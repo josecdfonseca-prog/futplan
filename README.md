@@ -27,15 +27,13 @@ futplan/
 - Branch: `main` / `(root)`
 - Clica em Save
 
-A app fica disponível em: `https://SEU-USERNAME.github.io/futplan/`
+A app fica disponível em: `https://josecdfonseca-prog.github.io/futplan/`
 
 ### 4. Configurar Supabase (IMPORTANTE)
 Vai a https://supabase.com/dashboard/project/ektzjdhqbgcbrvmhcqqj
 → Authentication → URL Configuration
-- **Site URL**: `https://SEU-USERNAME.github.io/futplan/`
-- **Redirect URLs**: adiciona `https://SEU-USERNAME.github.io/futplan/`
-
-Substitui `SEU-USERNAME` pelo teu username do GitHub no `manifest.json` também.
+- **Site URL**: `https://josecdfonseca-prog.github.io/futplan/`
+- **Redirect URLs**: adiciona `https://josecdfonseca-prog.github.io/futplan/`
 
 ### 5. Criar utilizador admin
 Supabase Dashboard → Authentication → Users → Add user → Create new user

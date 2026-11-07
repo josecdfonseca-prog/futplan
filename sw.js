@@ -1,11 +1,11 @@
 // FutPlan Service Worker
 const CACHE = 'futplan-v1';
 const ASSETS = [
-  '/futplan/',
-  '/futplan/index.html',
-  '/futplan/manifest.json',
-  '/futplan/icons/icon-192.png',
-  '/futplan/icons/icon-512.png',
+  'https://josecdfonseca-prog.github.io/futplan/',
+  'https://josecdfonseca-prog.github.io/futplan/index.html',
+  'https://josecdfonseca-prog.github.io/futplan/manifest.json',
+  'https://josecdfonseca-prog.github.io/futplan/icons/icon-192.png',
+  'https://josecdfonseca-prog.github.io/futplan/icons/icon-512.png',
 ];
 
 self.addEventListener('install', e => {
