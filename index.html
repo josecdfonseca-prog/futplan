@@ -397,11 +397,79 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── VISTA PAIS ── */
+    .filter-sel {
+      padding: 6px 10px; border-radius: 6px;
+      border: 1px solid var(--border); background: var(--surface);
+      color: var(--fg); font-size: 13px; font-family: inherit; outline: none;
+    }
+    .pais-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 14px;
+    }
+    .jogo-card {
+      background: var(--surface);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .jogo-card-head {
+      padding: 10px 14px 8px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .jogo-card-esc {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 15px; font-weight: 700; flex: 1;
+    }
+    .jogo-card-cf {
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+    }
+    .cf-C { background: #dbeafe; color: #1e40af; }
+    .cf-F { background: #fef3c7; color: #92400e; }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) .cf-C { background: #1e3a6e; color: #93c5fd; }
+      :root:not([data-theme="light"]) .cf-F { background: #3d2a00; color: #fcd34d; }
+    }
+    :root[data-theme="dark"] .cf-C { background: #1e3a6e; color: #93c5fd; }
+    :root[data-theme="dark"] .cf-F { background: #3d2a00; color: #fcd34d; }
+    .jogo-card-body { padding: 0 14px 14px; }
+    .jogo-card-adv {
+      font-size: 18px; font-weight: 700; line-height: 1.2;
+      color: var(--fg); margin-bottom: 6px;
+    }
+    .jogo-card-adv small { font-size: 12px; font-weight: 400; color: var(--fg2); display: block; }
+    .jogo-card-meta {
+      display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--fg2);
+    }
+    .jogo-card-meta span {
+      display: flex; align-items: center; gap: 3px;
+    }
+    .jogo-card-sep { height: 1px; background: var(--border); margin: 0 14px; }
+    .pais-empty {
+      text-align: center; padding: 60px 20px;
+      color: var(--fg3); font-size: 14px;
+    }
+    .pais-empty svg { display: block; margin: 0 auto 12px; opacity: .3; }
+
+    /* ── EXPORTAÇÃO (print) ── */
+    @media print {
+      .nav, .toolbar, .overlay, .toast, #view-micro, #view-pais { display: none !important; }
+      #view-mapa { display: block !important; }
+      body { background: white; }
+      .table-wrap { box-shadow: none; }
+      .mapa-table th { background: #1a3f7a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .chip-C { background: #dbeafe !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .chip-F { background: #fef3c7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
     @media (max-width: 600px) {
       .nav-brand { font-size: 16px; }
       .toolbar-title { font-size: 18px; }
       .form-grid { grid-template-columns: 1fr; }
-      .nav-tab { padding: 6px 10px; }
+      .nav-tab { padding: 6px 8px; font-size: 12px; }
     }
   </style>
 </head>
@@ -420,6 +488,7 @@
   <div class="nav-tabs">
     <button class="nav-tab active" data-view="mapa">Mapa Mensal</button>
     <button class="nav-tab" data-view="micro">Microciclo</button>
+    <button class="nav-tab" data-view="pais">👨‍👩‍👦 Pais</button>
   </div>
   <button class="nav-btn nav-btn-login" id="authBtn">🔑 Login</button>
 </nav>
@@ -435,6 +504,7 @@
         <button id="nextMonth">&#8250;</button>
       </div>
       <button class="btn btn-ghost btn-sm" id="toggleWeekend">Só fins-de-semana</button>
+      <button class="btn btn-ghost btn-sm" id="exportMapaBtn">⬇ Exportar</button>
       <button class="btn btn-primary btn-sm admin-only" id="addJogoBtn" hidden>+ Jogo</button>
     </div>
     <div class="legend">
@@ -461,6 +531,23 @@
     <div class="table-wrap" id="microWrap">
       <div class="loading"><div class="spinner"></div>A carregar…</div>
     </div>
+  </div>
+</main>
+
+  <!-- VISTA PAIS -->
+  <div class="view" id="view-pais">
+    <div class="toolbar">
+      <div class="toolbar-title">Próximos Jogos</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="filter-sel" id="paisEscalaoFilter"><option value="">Todos os escalões</option></select>
+        <select class="filter-sel" id="paisPeriodo">
+          <option value="semana">Esta semana</option>
+          <option value="mes">Este mês</option>
+          <option value="tudo">Todos</option>
+        </select>
+      </div>
+    </div>
+    <div id="paisCards" class="pais-grid"></div>
   </div>
 </main>
 
@@ -655,16 +742,6 @@ function populateSelects() {
   document.getElementById('jogoEscalao').innerHTML = opts;
   document.getElementById('treinoEscalao').innerHTML = opts;
 }
-
-// ── VIEWS ──
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    tab.classList.add('active');
-    document.getElementById('view-'+tab.dataset.view).classList.add('active');
-  });
-});
 
 // ── MAPA MENSAL ──
 function renderMapa() {
@@ -884,10 +961,118 @@ document.getElementById('deleteTreinoBtn').addEventListener('click', async()=>{
   await loadAll();
 });
 
+// ── EXPORTAR MAPA ──
+document.getElementById('exportMapaBtn').addEventListener('click', () => {
+  window.print();
+});
+
+// ── VISTA PAIS ──
+function renderPais() {
+  const escalaoFiltro = +document.getElementById('paisEscalaoFilter').value || null;
+  const periodo = document.getElementById('paisPeriodo').value;
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+
+  let dataMin, dataMax;
+  if (periodo === 'semana') {
+    dataMin = hoje;
+    dataMax = addDays(hoje, 7);
+  } else if (periodo === 'mes') {
+    dataMin = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    dataMax = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
+  } else {
+    dataMin = hoje;
+    dataMax = new Date('2099-12-31');
+  }
+
+  let filtrados = jogos.filter(j => {
+    const d = parseDateLocal(j.data);
+    return d >= dataMin && d <= dataMax && j.adversario !== 'A Definir';
+  });
+  if (escalaoFiltro) filtrados = filtrados.filter(j => j.escalao_id === escalaoFiltro);
+  filtrados.sort((a,b) => a.data.localeCompare(b.data) || (a.hora||'').localeCompare(b.hora||''));
+
+  const container = document.getElementById('paisCards');
+  if (!filtrados.length) {
+    container.innerHTML = `<div class="pais-empty">
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>
+      </svg>
+      Sem jogos para o período selecionado.
+    </div>`;
+    return;
+  }
+
+  let html = '';
+  let lastDate = '';
+  filtrados.forEach(j => {
+    const esc = escaloes.find(e => e.id === j.escalao_id);
+    const d = parseDateLocal(j.data);
+    const dateStr = fmt(d, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+    const hora = j.hora ? j.hora.slice(0,5) : null;
+    const jornada = j.jornada ? `Jornada ${j.jornada}` : '';
+
+    if (j.data !== lastDate) {
+      if (lastDate) html += '</div>';
+      html += `<div style="grid-column:1/-1;margin-top:${lastDate?'8px':'0'}">
+        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
+          color:var(--accent2);text-transform:uppercase;letter-spacing:.04em;
+          border-bottom:2px solid var(--accent2);padding-bottom:4px;margin-bottom:10px">
+          ${dateStr}
+        </div>
+      </div>
+      <div style="display:contents">`;
+      lastDate = j.data;
+    }
+
+    html += `<div class="jogo-card">
+      <div class="jogo-card-head" style="border-left:4px solid ${esc?.cor||'var(--accent2)'}">
+        <div class="jogo-card-esc" style="color:${esc?.cor||'var(--accent2)'}">${esc?.nome||''}</div>
+        <span class="jogo-card-cf cf-${j.casa_fora}">${j.casa_fora === 'C' ? '🏠 Casa' : '✈️ Fora'}</span>
+      </div>
+      <div class="jogo-card-sep"></div>
+      <div class="jogo-card-body">
+        <div class="jogo-card-adv">
+          ${j.adversario}
+          ${jornada ? `<small>${jornada}</small>` : ''}
+        </div>
+        <div class="jogo-card-meta">
+          ${hora ? `<span>⏰ ${hora}</span>` : ''}
+          ${j.local ? `<span>📍 ${j.local}</span>` : ''}
+          ${j.observacoes ? `<span>ℹ️ ${j.observacoes}</span>` : ''}
+        </div>
+      </div>
+    </div>`;
+  });
+  if (lastDate) html += '</div>';
+  container.innerHTML = html;
+}
+
+// Popula filtro de escalões na vista pais
+function populatePaisFilter() {
+  const sel = document.getElementById('paisEscalaoFilter');
+  sel.innerHTML = '<option value="">Todos os escalões</option>' +
+    escaloes.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+}
+
+document.getElementById('paisEscalaoFilter').addEventListener('change', renderPais);
+document.getElementById('paisPeriodo').addEventListener('change', renderPais);
+
+// ── VIEWS (override para incluir pais) ──
+document.querySelectorAll('.nav-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    tab.classList.add('active');
+    const v = document.getElementById('view-'+tab.dataset.view);
+    if (v) { v.classList.add('active'); if (tab.dataset.view==='pais') renderPais(); }
+  });
+});
+
 // ── INIT ──
 (async()=>{
   await initAuth();
   await loadAll();
+  populatePaisFilter();
 })();
 </script>
 </body>
