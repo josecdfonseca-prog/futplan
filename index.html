@@ -1,574 +1,337 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>FutPlan – Arões SC</title>
-  <meta name="description" content="Gestão de jogos e treinos do Arões Sport Clube">
-  <meta name="theme-color" content="#1a3f7a">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="FutPlan">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FutPlan – Arões Sport Clube</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1a3a6b">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+/* ===== RESET & BASE ===== */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f0f2f5;color:#1e293b;min-height:100vh}
+button{cursor:pointer;border:none;border-radius:6px;font-family:inherit;font-size:.85rem;font-weight:600;transition:all .15s}
+input,select,textarea{font-family:inherit;font-size:.9rem;border:1px solid #d1d5db;border-radius:6px;padding:7px 10px;width:100%;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:#3b82f6;box-shadow:0 0 0 3px rgba(59,130,246,.15)}
+label{font-size:.8rem;font-weight:600;color:#374151;display:block;margin-bottom:4px}
 
-  <style>
-    /* ── Layout: sticky nav + duas vistas (mapa mensal / microciclo) ── */
-    :root {
-      --bg:        #f0f2f5;
-      --surface:   #ffffff;
-      --surface2:  #f7f8fa;
-      --border:    #e2e6ec;
-      --fg:        #111827;
-      --fg2:       #4b5563;
-      --fg3:       #9ca3af;
-      --accent:    #1a3f7a;
-      --accent2:   #2563eb;
-      --accent-bg: #dbeafe;
-      --danger:    #dc2626;
-      --success:   #16a34a;
-      --warn:      #d97706;
-      --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.06);
-      --radius:    8px;
-      --nav-h:     56px;
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) {
-        --bg:        #0f1117;
-        --surface:   #1a1d27;
-        --surface2:  #22263a;
-        --border:    #2d3148;
-        --fg:        #e8eaf0;
-        --fg2:       #9ea3b8;
-        --fg3:       #5a607a;
-        --accent:    #3b6ed4;
-        --accent2:   #5b8aff;
-        --accent-bg: #1a2a4a;
-        --shadow:    0 1px 3px rgba(0,0,0,.4);
-        color-scheme: dark;
-      }
-    }
-    :root[data-theme="dark"] {
-      --bg:        #0f1117;
-      --surface:   #1a1d27;
-      --surface2:  #22263a;
-      --border:    #2d3148;
-      --fg:        #e8eaf0;
-      --fg2:       #9ea3b8;
-      --fg3:       #5a607a;
-      --accent:    #3b6ed4;
-      --accent2:   #5b8aff;
-      --accent-bg: #1a2a4a;
-      --shadow:    0 1px 3px rgba(0,0,0,.4);
-      color-scheme: dark;
-    }
+/* ===== HEADER ===== */
+header{background:linear-gradient(135deg,#1a3a6b 0%,#2563eb 100%);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+header img{width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.4)}
+header h1{font-size:1.1rem;font-weight:700;line-height:1.2}
+header h1 small{display:block;font-size:.7rem;font-weight:400;opacity:.8}
+#headerRight{margin-left:auto;display:flex;gap:8px;align-items:center}
+#loginBtn{background:rgba(255,255,255,.15);color:#fff;padding:6px 14px;border-radius:20px;font-size:.8rem;border:1px solid rgba(255,255,255,.3)}
+#loginBtn:hover{background:rgba(255,255,255,.25)}
+#userInfo{font-size:.75rem;opacity:.8;display:none}
 
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { height: 100%; margin: 0; }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      font-size: 14px;
-      line-height: 1.5;
-    }
+/* ===== NAV TABS ===== */
+nav{background:#fff;border-bottom:2px solid #e5e7eb;display:flex;overflow-x:auto;position:sticky;top:0;z-index:50}
+.nav-tab{padding:12px 20px;font-size:.85rem;font-weight:600;color:#6b7280;background:none;border-radius:0;border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s}
+.nav-tab:hover{color:#3b82f6;background:#f8fafc}
+.nav-tab.active{color:#1d4ed8;border-bottom-color:#2563eb;background:#eff6ff}
 
-    /* ── NAV ── */
-    .nav {
-      position: sticky;
-      top: env(safe-area-inset-top, 0px);
-      z-index: 100;
-      background: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 0;
-      height: var(--nav-h);
-      padding-left: max(16px, env(safe-area-inset-left, 0px));
-      padding-right: max(16px, env(safe-area-inset-right, 0px));
-      box-shadow: 0 2px 8px rgba(0,0,0,.2);
-    }
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0 0 auto;
-      height: env(safe-area-inset-top, 0px);
-      background: var(--accent);
-      z-index: 110;
-    }
-    .nav-brand {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 20px;
-      font-weight: 700;
-      color: #fff;
-      letter-spacing: .02em;
-      margin-right: auto;
-      white-space: nowrap;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .nav-brand svg { flex-shrink: 0; }
-    .nav-brand span { opacity: .65; font-weight: 600; }
-    .nav-tabs { display: flex; gap: 2px; }
-    .nav-tab {
-      padding: 6px 14px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,.65);
-      cursor: pointer;
-      border: none;
-      background: none;
-      transition: background .15s, color .15s;
-      white-space: nowrap;
-    }
-    .nav-tab.active, .nav-tab:hover { background: rgba(255,255,255,.18); color: #fff; }
-    .nav-tab.active { background: rgba(255,255,255,.25); }
-    .nav-btn {
-      margin-left: 8px;
-      padding: 6px 12px;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      transition: background .15s;
-      white-space: nowrap;
-    }
-    .nav-btn-login { background: rgba(255,255,255,.2); color: #fff; }
-    .nav-btn-login:hover { background: rgba(255,255,255,.3); }
-    .nav-btn-logout { background: rgba(220,38,38,.7); color: #fff; }
+/* ===== MAIN CONTENT ===== */
+main{padding:16px}
+.section{display:none}
+.section.active{display:block}
 
-    /* ── MAIN ── */
-    .main {
-      padding-block: 20px;
-      padding-left: max(16px, env(safe-area-inset-left, 0px));
-      padding-right: max(16px, env(safe-area-inset-right, 0px));
-      max-width: 1400px;
-      margin: 0 auto;
-    }
-    .view { display: none; }
-    .view.active { display: block; }
+/* ===== TOOLBAR ===== */
+.toolbar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px;align-items:center}
+.toolbar h2{font-size:1rem;font-weight:700;color:#1e293b;flex:1;min-width:140px}
+.btn-primary{background:#2563eb;color:#fff;padding:7px 16px}
+.btn-primary:hover{background:#1d4ed8}
+.btn-success{background:#059669;color:#fff;padding:7px 16px}
+.btn-success:hover{background:#047857}
+.btn-danger{background:#dc2626;color:#fff;padding:5px 10px;font-size:.75rem}
+.btn-danger:hover{background:#b91c1c}
+.btn-warning{background:#d97706;color:#fff;padding:5px 10px;font-size:.75rem}
+.btn-warning:hover{background:#b45309}
+.btn-sm{background:#e5e7eb;color:#374151;padding:5px 10px;font-size:.75rem}
+.btn-sm:hover{background:#d1d5db}
+.btn-export{background:#7c3aed;color:#fff;padding:7px 14px;font-size:.8rem}
+.btn-export:hover{background:#6d28d9}
 
-    /* ── TOOLBAR ── */
-    .toolbar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .toolbar-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 22px;
-      font-weight: 700;
-      letter-spacing: .02em;
-      color: var(--accent2);
-      margin-right: auto;
-    }
-    .btn {
-      padding: 7px 14px;
-      border-radius: var(--radius);
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      border: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      transition: filter .15s;
-    }
-    .btn:hover { filter: brightness(1.08); }
-    .btn-primary { background: var(--accent2); color: #fff; }
-    .btn-ghost { background: var(--surface); color: var(--fg2); border: 1px solid var(--border); }
-    .btn-danger { background: var(--danger); color: #fff; }
-    .btn-sm { padding: 4px 10px; font-size: 12px; }
+select.month-sel,select.week-sel{padding:6px 10px;font-size:.85rem;width:auto;min-width:140px}
 
-    /* ── NAVEGADORES ── */
-    .period-nav { display: flex; align-items: center; gap: 8px; }
-    .period-nav .period-label {
-      font-weight: 700; font-size: 14px;
-      min-width: 160px; text-align: center; color: var(--fg);
-    }
-    .period-nav button {
-      width: 30px; height: 30px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--fg2);
-      cursor: pointer;
-      font-size: 18px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .period-nav button:hover { background: var(--accent-bg); }
+/* ===== TABLE WRAPPER ===== */
+.table-wrap{overflow-x:auto;border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.1)}
 
-    /* ── TABELAS ── */
-    .table-wrap { overflow-x: auto; border-radius: var(--radius); box-shadow: var(--shadow); }
-    .mapa-table, .micro-table {
-      border-collapse: collapse;
-      width: 100%;
-      background: var(--surface);
-      font-size: 13px;
-    }
-    .mapa-table { min-width: 700px; }
-    .micro-table { min-width: 750px; }
+/* ===== SCHEDULE TABLE ===== */
+.sched-table{border-collapse:collapse;width:100%;background:#fff;font-size:.78rem}
+.sched-table th{background:#1a3a6b;color:#fff;padding:8px 10px;text-align:center;white-space:nowrap;position:sticky;top:0;z-index:10}
+.sched-table th.team-col{text-align:left;min-width:130px;position:sticky;left:0;z-index:20}
+.sched-table td{border:1px solid #e5e7eb;padding:4px;vertical-align:top;min-width:120px;min-height:60px}
+.sched-table td.team-name-cell{background:#f8fafc;font-weight:700;font-size:.8rem;padding:8px;white-space:nowrap;position:sticky;left:0;z-index:5}
+.sched-table td.drop-zone{background:#fafafa;min-height:56px}
+.sched-table td.drop-zone.drag-over{background:#eff6ff;outline:2px dashed #3b82f6}
 
-    .mapa-table th, .micro-table th {
-      background: var(--accent);
-      color: #fff;
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 13px;
-      font-weight: 700;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      padding: 8px 10px;
-      text-align: center;
-      border: 1px solid rgba(255,255,255,.12);
-      white-space: nowrap;
-    }
-    .mapa-table th.col-esc, .micro-table th.col-esc {
-      text-align: left; min-width: 110px;
-      position: sticky; left: 0; z-index: 2;
-    }
-    .mapa-table th.col-date { min-width: 130px; }
+/* ===== CARDS ===== */
+.card-item{border-radius:6px;padding:5px 7px;margin-bottom:4px;cursor:grab;user-select:none;transition:box-shadow .15s;position:relative}
+.card-item:hover{box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.card-item.dragging{opacity:.5;cursor:grabbing}
+.card-item:active{cursor:grabbing}
 
-    .mapa-table td, .micro-table td {
-      border: 1px solid var(--border);
-      padding: 0;
-      vertical-align: top;
-      position: relative;
-    }
-    .mapa-table td.col-esc, .micro-table td.col-esc {
-      position: sticky; left: 0;
-      background: var(--surface);
-      z-index: 1;
-      padding: 10px;
-      min-width: 110px;
-    }
-    .esc-nome { font-weight: 700; font-size: 13px; line-height: 1.2; }
-    .esc-sub  { font-size: 11px; color: var(--fg3); margin-top: 2px; }
+/* Card tipo jogo */
+.card-jogo{color:#fff}
+.card-jogo .card-tipo{font-size:.65rem;font-weight:700;text-transform:uppercase;opacity:.85;letter-spacing:.5px;line-height:1.1}
+.card-jogo .card-adv{font-size:.78rem;font-weight:700;line-height:1.2;margin:1px 0}
+.card-jogo .card-hora{font-size:.7rem;font-weight:600;opacity:.9}
+.card-jogo .card-local{font-size:.62rem;opacity:.8;font-style:italic;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-jogo .card-actions{position:absolute;top:3px;right:3px;display:none;gap:2px}
+.card-jogo:hover .card-actions{display:flex}
+.card-actions button{background:rgba(0,0,0,.3);color:#fff;padding:2px 5px;font-size:.65rem;border-radius:3px}
+.card-actions button:hover{background:rgba(0,0,0,.5)}
 
-    /* Chips jogos */
-    .cell-inner { min-height: 70px; padding: 6px 8px; display: flex; flex-direction: column; gap: 4px; }
-    .cell-inner:empty::after {
-      content: '—'; color: var(--fg3); font-size: 18px;
-      display: block; text-align: center; padding-top: 10px;
-    }
-    .jogo-chip {
-      border-radius: 5px; padding: 4px 7px;
-      font-size: 12px; line-height: 1.3;
-      cursor: pointer; border: none;
-      text-align: left; display: block; width: 100%;
-      transition: filter .12s;
-    }
-    .jogo-chip:hover { filter: brightness(.92); }
-    .jogo-chip .jornada { font-size: 10px; font-weight: 700; opacity: .75; letter-spacing: .05em; }
-    .jogo-chip .adversario { font-weight: 600; }
-    .jogo-chip .hora { font-size: 11px; opacity: .8; }
-    .chip-C { background: #dbeafe; color: #1e40af; }
-    .chip-F { background: #fef3c7; color: #92400e; }
-    .chip-adiado { opacity: .6; text-decoration: line-through; }
-    .chip-cancelado { opacity: .5; }
+/* Card tipo treino */
+.card-treino{background:#fff;border-left:4px solid;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.card-treino .card-tipo{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;opacity:.7;line-height:1.1}
+.card-treino .card-hora{font-size:.8rem;font-weight:700;line-height:1.2}
+.card-treino .card-campo{font-size:.68rem;color:#374151;line-height:1.2}
+.card-treino .card-balneario{font-size:.62rem;color:#6b7280;line-height:1.2}
+.card-treino .card-actions{position:absolute;top:3px;right:3px;display:none;gap:2px}
+.card-treino:hover .card-actions{display:flex}
 
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) .chip-C { background: #1e3a6e; color: #93c5fd; }
-      :root:not([data-theme="light"]) .chip-F { background: #3d2a00; color: #fcd34d; }
-    }
-    :root[data-theme="dark"] .chip-C { background: #1e3a6e; color: #93c5fd; }
-    :root[data-theme="dark"] .chip-F { background: #3d2a00; color: #fcd34d; }
+/* ===== ADD CARD BUTTON (dentro de célula) ===== */
+.btn-add-cell{width:100%;padding:4px;font-size:.7rem;background:transparent;color:#9ca3af;border:1px dashed #d1d5db;border-radius:4px;text-align:center;transition:all .15s;display:none}
+.btn-add-cell:hover{background:#eff6ff;color:#2563eb;border-color:#93c5fd}
+td:hover .btn-add-cell,td.drop-zone:hover .btn-add-cell{display:block}
 
-    /* Chips treinos */
-    .treino-chip {
-      margin: 4px 6px; border-radius: 5px; padding: 5px 7px;
-      font-size: 11.5px; line-height: 1.35;
-      cursor: pointer; border: none; text-align: left; display: block;
-      transition: filter .12s;
-      background: #dcfce7; color: #14532d;
-    }
-    .treino-chip:hover { filter: brightness(.9); }
-    .treino-chip .hora { font-weight: 700; font-size: 12px; }
-    .treino-chip .local { font-size: 11px; opacity: .8; }
-    .treino-chip.jogo_treino { background: #fef9c3; color: #713f12; }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) .treino-chip { background: #14532d; color: #bbf7d0; }
-      :root:not([data-theme="light"]) .treino-chip.jogo_treino { background: #3d2b00; color: #fde68a; }
-    }
-    :root[data-theme="dark"] .treino-chip { background: #14532d; color: #bbf7d0; }
-    :root[data-theme="dark"] .treino-chip.jogo_treino { background: #3d2b00; color: #fde68a; }
+/* ===== MODALS ===== */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:12px;padding:24px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{font-size:1rem;font-weight:700;margin-bottom:16px;color:#1e293b}
+.form-row{margin-bottom:12px}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;border-top:1px solid #e5e7eb;padding-top:14px}
 
-    /* Botão + na célula */
-    .cell-add {
-      opacity: 0; position: absolute; bottom: 4px; right: 4px;
-      width: 22px; height: 22px; border-radius: 50%;
-      background: var(--accent2); color: #fff;
-      border: none; cursor: pointer; font-size: 16px;
-      display: flex; align-items: center; justify-content: center;
-      transition: opacity .15s;
-    }
-    td:hover .cell-add { opacity: 1; }
+/* ===== CRUD TABLES ===== */
+.crud-table{width:100%;border-collapse:collapse;font-size:.85rem;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.1)}
+.crud-table th{background:#1a3a6b;color:#fff;padding:10px 12px;text-align:left;font-weight:600}
+.crud-table td{padding:9px 12px;border-bottom:1px solid #f0f2f5;vertical-align:middle}
+.crud-table tr:hover td{background:#f8fafc}
+.crud-table tr:last-child td{border-bottom:none}
+.color-swatch{display:inline-block;width:18px;height:18px;border-radius:4px;border:1px solid rgba(0,0,0,.2);vertical-align:middle;margin-right:6px}
 
-    /* ── MODALS ── */
-    .overlay {
-      position: fixed; inset: 0;
-      background: rgba(0,0,0,.5);
-      z-index: 200;
-      display: flex; align-items: center; justify-content: center;
-      padding: max(16px, env(safe-area-inset-left, 0px));
-    }
-    .overlay[hidden] { display: none !important; }
-    .modal {
-      background: var(--surface);
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,.3);
-      width: 100%; max-width: 480px;
-      max-height: 90vh; overflow-y: auto;
-      padding: 24px;
-    }
-    .modal-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 20px; font-weight: 700;
-      color: var(--accent2); margin: 0 0 20px;
-    }
-    .form-row { margin-bottom: 14px; }
-    .form-row label {
-      display: block; font-size: 12px; font-weight: 600;
-      color: var(--fg2); margin-bottom: 4px;
-      text-transform: uppercase; letter-spacing: .04em;
-    }
-    .form-row input, .form-row select, .form-row textarea {
-      width: 100%; padding: 8px 10px;
-      border-radius: 6px; border: 1px solid var(--border);
-      background: var(--bg); color: var(--fg);
-      font-size: 14px; font-family: inherit; outline: none;
-      transition: border-color .15s;
-    }
-    .form-row input:focus, .form-row select:focus, .form-row textarea:focus { border-color: var(--accent2); }
-    .form-row textarea { resize: vertical; min-height: 60px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-    .modal-footer {
-      display: flex; gap: 8px; justify-content: flex-end;
-      margin-top: 20px; flex-wrap: wrap;
-    }
+/* ===== LEGENDA ===== */
+.legenda{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.legenda-item{display:flex;align-items:center;gap:5px;font-size:.72rem;font-weight:600;padding:3px 8px;border-radius:12px;color:#fff}
 
-    /* Login */
-    .login-logo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 28px; font-weight: 700; color: var(--accent2); margin-bottom: 4px;
-    }
-    .login-sub { font-size: 13px; color: var(--fg2); margin-bottom: 20px; }
+/* ===== PAIS VIEW ===== */
+.pais-filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+.pais-filters select{width:auto;min-width:150px}
+.jogos-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.jogo-card-pais{border-radius:10px;padding:14px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.jogo-card-pais .p-escalao{font-size:.7rem;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.5px}
+.jogo-card-pais .p-tipo{font-size:.75rem;font-weight:600;opacity:.85;margin:2px 0}
+.jogo-card-pais .p-adv{font-size:1rem;font-weight:700;line-height:1.2;margin:4px 0}
+.jogo-card-pais .p-data{font-size:.78rem;opacity:.85}
+.jogo-card-pais .p-hora{font-size:.85rem;font-weight:700}
+.jogo-card-pais .p-local{font-size:.72rem;opacity:.8;margin-top:4px;font-style:italic}
+.empty-state{text-align:center;padding:40px;color:#9ca3af;font-size:.9rem}
 
-    /* Toast */
-    .toast {
-      position: fixed; bottom: max(24px, env(safe-area-inset-bottom, 24px));
-      left: 50%; transform: translateX(-50%) translateY(80px);
-      background: #1e293b; color: #fff;
-      padding: 10px 20px; border-radius: 8px;
-      font-size: 13px; font-weight: 500;
-      box-shadow: 0 4px 20px rgba(0,0,0,.3);
-      transition: transform .3s ease;
-      z-index: 300; white-space: nowrap;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+/* ===== TOAST ===== */
+#toast{position:fixed;bottom:20px;right:20px;padding:12px 20px;border-radius:8px;font-size:.85rem;font-weight:600;color:#fff;background:#1e293b;box-shadow:0 4px 16px rgba(0,0,0,.3);z-index:9999;transform:translateY(60px);opacity:0;transition:all .3s}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.success{background:#059669}
+#toast.error{background:#dc2626}
 
-    /* Legenda */
-    .legend {
-      display: flex; gap: 10px; flex-wrap: wrap;
-      margin-bottom: 10px; font-size: 12px;
-      align-items: center; color: var(--fg2);
-    }
-    .legend-item { display: flex; align-items: center; gap: 4px; }
-    .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+/* ===== ADMIN ONLY ===== */
+.admin-only{display:none}
+body.logged-in .admin-only{display:flex}
+body.logged-in .admin-only-block{display:block}
+.admin-only-block{display:none}
 
-    /* Loading */
-    .loading {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; padding: 60px 20px; color: var(--fg3);
-    }
-    .spinner {
-      width: 28px; height: 28px;
-      border: 3px solid var(--border); border-top-color: var(--accent2);
-      border-radius: 50%; animation: spin .7s linear infinite;
-      margin-bottom: 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* ===== PRINT ===== */
+@media print{
+  header,nav,.toolbar,.pais-filters,.btn-add-cell,.card-actions,#toast,.overlay{display:none!important}
+  .section{display:block!important}
+  .table-wrap{box-shadow:none}
+  body{background:#fff}
+  .sched-table{font-size:.7rem}
+  .card-item{break-inside:avoid}
+}
 
-    /* ── VISTA PAIS ── */
-    .filter-sel {
-      padding: 6px 10px; border-radius: 6px;
-      border: 1px solid var(--border); background: var(--surface);
-      color: var(--fg); font-size: 13px; font-family: inherit; outline: none;
-    }
-    .pais-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px;
-    }
-    .jogo-card {
-      background: var(--surface);
-      border-radius: 10px;
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-    .jogo-card-head {
-      padding: 10px 14px 8px;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .jogo-card-esc {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-size: 15px; font-weight: 700; flex: 1;
-    }
-    .jogo-card-cf {
-      font-size: 11px; font-weight: 700;
-      padding: 2px 8px; border-radius: 20px;
-    }
-    .cf-C { background: #dbeafe; color: #1e40af; }
-    .cf-F { background: #fef3c7; color: #92400e; }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) .cf-C { background: #1e3a6e; color: #93c5fd; }
-      :root:not([data-theme="light"]) .cf-F { background: #3d2a00; color: #fcd34d; }
-    }
-    :root[data-theme="dark"] .cf-C { background: #1e3a6e; color: #93c5fd; }
-    :root[data-theme="dark"] .cf-F { background: #3d2a00; color: #fcd34d; }
-    .jogo-card-body { padding: 0 14px 14px; }
-    .jogo-card-adv {
-      font-size: 18px; font-weight: 700; line-height: 1.2;
-      color: var(--fg); margin-bottom: 6px;
-    }
-    .jogo-card-adv small { font-size: 12px; font-weight: 400; color: var(--fg2); display: block; }
-    .jogo-card-meta {
-      display: flex; flex-wrap: wrap; gap: 6px; font-size: 12px; color: var(--fg2);
-    }
-    .jogo-card-meta span {
-      display: flex; align-items: center; gap: 3px;
-    }
-    .jogo-card-sep { height: 1px; background: var(--border); margin: 0 14px; }
-    .pais-empty {
-      text-align: center; padding: 60px 20px;
-      color: var(--fg3); font-size: 14px;
-    }
-    .pais-empty svg { display: block; margin: 0 auto 12px; opacity: .3; }
-
-    /* ── EXPORTAÇÃO (print) ── */
-    @media print {
-      .nav, .toolbar, .overlay, .toast, #view-micro, #view-pais { display: none !important; }
-      #view-mapa { display: block !important; }
-      body { background: white; }
-      .table-wrap { box-shadow: none; }
-      .mapa-table th { background: #1a3f7a !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .chip-C { background: #dbeafe !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-      .chip-F { background: #fef3c7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    }
-
-    @media (max-width: 600px) {
-      .nav-brand { font-size: 16px; }
-      .toolbar-title { font-size: 18px; }
-      .form-grid { grid-template-columns: 1fr; }
-      .nav-tab { padding: 6px 8px; font-size: 12px; }
-    }
-  </style>
+/* ===== RESPONSIVE ===== */
+@media(max-width:600px){
+  header h1{font-size:.9rem}
+  main{padding:10px}
+  .modal{padding:16px}
+}
+</style>
 </head>
 <body>
 
+<!-- HEADER -->
+<header>
+  <div>
+    <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.4rem">⚽</div>
+  </div>
+  <div>
+    <h1>FutPlan<small>Arões Sport Clube – Época 2026/2027</small></h1>
+  </div>
+  <div id="headerRight">
+    <span id="userInfo"></span>
+    <button id="loginBtn" onclick="openLogin()">🔐 Admin</button>
+    <button id="logoutBtn" class="admin-only" style="background:rgba(220,38,38,.6);color:#fff;padding:6px 12px;border-radius:20px;font-size:.8rem;display:none" onclick="doLogout()">Sair</button>
+  </div>
+</header>
+
 <!-- NAV -->
-<nav class="nav">
-  <div class="nav-brand">
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-      <circle cx="11" cy="11" r="10" stroke="rgba(255,255,255,.8)" stroke-width="1.5"/>
-      <path d="M11 1 C6 4 3 8 3 11 C3 15 6 18 11 21 C16 18 19 15 19 11 C19 8 16 4 11 1Z" fill="rgba(255,255,255,.15)"/>
-      <path d="M4 7 L18 7 M4 15 L18 15 M11 1 L11 21" stroke="rgba(255,255,255,.5)" stroke-width="1"/>
-    </svg>
-    FutPlan <span>Arões SC</span>
-  </div>
-  <div class="nav-tabs">
-    <button class="nav-tab active" data-view="mapa">Mapa Mensal</button>
-    <button class="nav-tab" data-view="micro">Microciclo</button>
-    <button class="nav-tab" data-view="pais">👨‍👩‍👦 Pais</button>
-  </div>
-  <button class="nav-btn nav-btn-login" id="authBtn">🔑 Login</button>
+<nav>
+  <button class="nav-tab active" data-tab="mapa">📅 Mapa Mensal</button>
+  <button class="nav-tab" data-tab="micro">🏃 Microciclo</button>
+  <button class="nav-tab" data-tab="pais">👨‍👩‍👦 Pais</button>
+  <button class="nav-tab admin-only" data-tab="equipas" style="display:none">👕 Equipas</button>
+  <button class="nav-tab admin-only" data-tab="campos" style="display:none">🏟️ Campos</button>
+  <button class="nav-tab admin-only" data-tab="balnearios" style="display:none">🚿 Balneários</button>
+  <button class="nav-tab admin-only" data-tab="epocas" style="display:none">📆 Épocas</button>
 </nav>
 
-<main class="main">
-  <!-- MAPA MENSAL -->
-  <div class="view active" id="view-mapa">
-    <div class="toolbar">
-      <div class="toolbar-title">Mapa de Jogos</div>
-      <div class="period-nav">
-        <button id="prevMonth">&#8249;</button>
-        <span class="period-label" id="monthLabel">—</span>
-        <button id="nextMonth">&#8250;</button>
-      </div>
-      <button class="btn btn-ghost btn-sm" id="toggleWeekend">Só fins-de-semana</button>
-      <button class="btn btn-ghost btn-sm" id="exportMapaBtn">⬇ Exportar</button>
-      <button class="btn btn-primary btn-sm admin-only" id="addJogoBtn" hidden>+ Jogo</button>
-    </div>
-    <div class="legend">
-      <span>Legenda:</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>Casa</span>
-      <span class="legend-item"><span class="legend-dot" style="background:#f59e0b"></span>Fora</span>
-    </div>
-    <div class="table-wrap" id="mapaWrap">
-      <div class="loading"><div class="spinner"></div>A carregar…</div>
-    </div>
-  </div>
+<main>
 
-  <!-- MICROCICLO -->
-  <div class="view" id="view-micro">
-    <div class="toolbar">
-      <div class="toolbar-title">Microciclo Semanal</div>
-      <div class="period-nav">
-        <button id="prevSemana">&#8249;</button>
-        <span class="period-label" id="semanaLabel" style="min-width:200px">—</span>
-        <button id="nextSemana">&#8250;</button>
-      </div>
-      <button class="btn btn-primary btn-sm admin-only" id="addTreinoBtn" hidden>+ Treino</button>
-    </div>
-    <div class="table-wrap" id="microWrap">
-      <div class="loading"><div class="spinner"></div>A carregar…</div>
-    </div>
+<!-- ============ MAPA MENSAL ============ -->
+<section class="section active" id="tab-mapa">
+  <div class="toolbar">
+    <h2>📅 Mapa Mensal</h2>
+    <select class="month-sel" id="mapaMonth" onchange="renderMapa()"></select>
+    <button class="btn-primary admin-only" onclick="openJogoModal()" style="display:none">+ Jogo</button>
+    <button class="btn-export" onclick="window.print()">🖨️ Imprimir</button>
   </div>
+  <div class="legenda" id="mapaLegenda"></div>
+  <div class="table-wrap"><div id="mapaTable"></div></div>
+</section>
+
+<!-- ============ MICROCICLO ============ -->
+<section class="section" id="tab-micro">
+  <div class="toolbar">
+    <h2>🏃 Microciclo Semanal</h2>
+    <select class="week-sel" id="microWeek" onchange="renderMicro()"></select>
+    <button class="btn-success admin-only" onclick="openTreinoModal()" style="display:none">+ Treino</button>
+    <button class="btn-export" onclick="window.print()">🖨️ Imprimir</button>
+  </div>
+  <div class="legenda" id="microLegenda"></div>
+  <div class="table-wrap"><div id="microTable"></div></div>
+</section>
+
+<!-- ============ PAIS ============ -->
+<section class="section" id="tab-pais">
+  <div class="pais-filters">
+    <h2 style="font-size:1rem;font-weight:700;flex:1">👨‍👩‍👦 Próximos Jogos</h2>
+    <select id="paisEscalao" onchange="renderPais()"><option value="">Todas as equipas</option></select>
+    <select id="paisMes" onchange="renderPais()"><option value="">Todos os meses</option></select>
+  </div>
+  <div id="paisGrid"></div>
+</section>
+
+<!-- ============ EQUIPAS (CRUD) ============ -->
+<section class="section" id="tab-equipas">
+  <div class="toolbar">
+    <h2>👕 Equipas</h2>
+    <button class="btn-primary" onclick="openEquipaModal()">+ Nova Equipa</button>
+  </div>
+  <div class="table-wrap">
+    <table class="crud-table" id="equipasTable">
+      <thead><tr><th>Nome</th><th>Abrev.</th><th>Sub</th><th>Anos Nasc.</th><th>Cor</th><th>Ordem</th><th>Ações</th></tr></thead>
+      <tbody id="equipasTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ CAMPOS (CRUD) ============ -->
+<section class="section" id="tab-campos">
+  <div class="toolbar">
+    <h2>🏟️ Campos</h2>
+    <button class="btn-primary" onclick="openCampoModal()">+ Novo Campo</button>
+  </div>
+  <div class="table-wrap">
+    <table class="crud-table" id="camposTable">
+      <thead><tr><th>Nome</th><th>Localização</th><th>Ações</th></tr></thead>
+      <tbody id="camposTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ BALNEÁRIOS (CRUD) ============ -->
+<section class="section" id="tab-balnearios">
+  <div class="toolbar">
+    <h2>🚿 Balneários</h2>
+    <button class="btn-primary" onclick="openBalnearioModal()">+ Novo Balneário</button>
+  </div>
+  <div class="table-wrap">
+    <table class="crud-table" id="balnerariosTable">
+      <thead><tr><th>Nome</th><th>Ações</th></tr></thead>
+      <tbody id="balneTbody"></tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ============ ÉPOCAS (CRUD) ============ -->
+<section class="section" id="tab-epocas">
+  <div class="toolbar">
+    <h2>📆 Épocas</h2>
+    <button class="btn-primary" onclick="openEpocaModal()">+ Nova Época</button>
+  </div>
+  <div class="table-wrap">
+    <table class="crud-table" id="epocasTable">
+      <thead><tr><th>Nome</th><th>Ativa</th><th>Ações</th></tr></thead>
+      <tbody id="epocasTbody"></tbody>
+    </table>
+  </div>
+</section>
+
 </main>
 
-  <!-- VISTA PAIS -->
-  <div class="view" id="view-pais">
-    <div class="toolbar">
-      <div class="toolbar-title">Próximos Jogos</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <select class="filter-sel" id="paisEscalaoFilter"><option value="">Todos os escalões</option></select>
-        <select class="filter-sel" id="paisPeriodo">
-          <option value="semana">Esta semana</option>
-          <option value="mes">Este mês</option>
-          <option value="tudo">Todos</option>
-        </select>
-      </div>
-    </div>
-    <div id="paisCards" class="pais-grid"></div>
-  </div>
-</main>
+<!-- ===== TOAST ===== -->
+<div id="toast"></div>
 
-<!-- MODAL JOGO -->
-<div class="overlay" id="jogoOverlay" hidden>
+<!-- ===== OVERLAY LOGIN ===== -->
+<div class="overlay" id="loginOverlay">
   <div class="modal">
-    <div class="modal-title" id="jogoModalTitle">Novo Jogo</div>
+    <h3>🔐 Login Admin</h3>
+    <div class="form-row"><label>Email</label><input type="email" id="loginEmail" placeholder="admin@aroessc.pt"></div>
+    <div class="form-row"><label>Palavra-passe</label><input type="password" id="loginPass" placeholder="••••••••"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('loginOverlay')">Cancelar</button>
+      <button class="btn-primary" onclick="doLogin()">Entrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== OVERLAY JOGO ===== -->
+<div class="overlay" id="jogoOverlay">
+  <div class="modal">
+    <h3 id="jogoModalTitle">➕ Adicionar Jogo</h3>
     <input type="hidden" id="jogoId">
-    <div class="form-row"><label>Escalão</label><select id="jogoEscalao"></select></div>
-    <div class="form-grid">
-      <div class="form-row"><label>Data</label><input type="date" id="jogoData"></div>
-      <div class="form-row"><label>Hora</label><input type="time" id="jogoHora"></div>
+    <div class="form-row-2">
+      <div class="form-row" style="margin-bottom:0"><label>Equipa</label>
+        <select id="jogoEscalao"></select></div>
+      <div class="form-row" style="margin-bottom:0"><label>Data</label>
+        <input type="date" id="jogoData"></div>
     </div>
-    <div class="form-grid">
-      <div class="form-row"><label>Jornada nº</label><input type="number" id="jogoJornada" min="1"></div>
-      <div class="form-row"><label>Casa / Fora</label>
-        <select id="jogoCasaFora"><option value="C">Casa (C)</option><option value="F">Fora (F)</option></select>
-      </div>
+    <div class="form-row-2" style="margin-top:10px">
+      <div><label>Hora</label><input type="time" id="jogoHora"></div>
+      <div><label>Casa/Fora</label>
+        <select id="jogoCasaFora"><option value="C">🏠 Casa (C)</option><option value="F">✈️ Fora (F)</option></select></div>
     </div>
-    <div class="form-row"><label>Adversário</label><input type="text" id="jogoAdversario" placeholder="Nome do clube"></div>
-    <div class="form-row"><label>Local / Campo</label><input type="text" id="jogoLocal" placeholder="ex: Campo Arões"></div>
+    <div class="form-row"><label>Tipo de Jogo</label>
+      <select id="jogoTipo">
+        <option value="jornada">Jornada</option>
+        <option value="taca">Taça Eliminatória</option>
+        <option value="jogo_treino">Jogo Treino</option>
+        <option value="isento">Isento</option>
+      </select>
+    </div>
+    <div class="form-row-2" id="jogoJornadaRow">
+      <div><label>Nº Jornada / Jogo</label><input type="number" id="jogoJornada" min="1"></div>
+      <div><label>Sub-equipa (A/B – Traq/Pet)</label>
+        <select id="jogoSubEquipa"><option value="">—</option><option value="A">A</option><option value="B">B</option></select></div>
+    </div>
+    <div class="form-row"><label>Adversário</label><input type="text" id="jogoAdversario" placeholder="Nome do adversário"></div>
+    <div class="form-row"><label>Local / Campo</label>
+      <select id="jogoLocal"><option value="">Seleccionar campo...</option></select></div>
     <div class="form-row"><label>Estado</label>
       <select id="jogoEstado">
         <option value="agendado">Agendado</option>
@@ -577,503 +340,1035 @@
         <option value="cancelado">Cancelado</option>
       </select>
     </div>
-    <div class="form-grid">
-      <div class="form-row"><label>Resultado — Nós</label><input type="number" id="jogoResNos" min="0" placeholder="—"></div>
-      <div class="form-row"><label>Resultado — Adv.</label><input type="number" id="jogoResAdv" min="0" placeholder="—"></div>
-    </div>
-    <div class="form-row"><label>Observações</label><textarea id="jogoObs"></textarea></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" id="deleteJogoBtn" hidden>Eliminar</button>
-      <button class="btn btn-ghost" id="cancelJogoBtn">Cancelar</button>
-      <button class="btn btn-primary" id="saveJogoBtn">Guardar</button>
+    <div class="form-row"><label>Observações</label><textarea id="jogoObs" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('jogoOverlay')">Cancelar</button>
+      <button class="btn-danger admin-only" id="jogoDeleteBtn" onclick="deleteJogo()" style="display:none">Eliminar</button>
+      <button class="btn-primary" onclick="saveJogo()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- MODAL TREINO -->
-<div class="overlay" id="treinoOverlay" hidden>
+<!-- ===== OVERLAY TREINO ===== -->
+<div class="overlay" id="treinoOverlay">
   <div class="modal">
-    <div class="modal-title" id="treinoModalTitle">Novo Treino</div>
+    <h3 id="treinoModalTitle">➕ Adicionar Treino</h3>
     <input type="hidden" id="treinoId">
-    <div class="form-row"><label>Escalão</label><select id="treinoEscalao"></select></div>
-    <div class="form-grid">
-      <div class="form-row"><label>Data</label><input type="date" id="treinoData"></div>
-      <div class="form-row"><label>Tipo</label>
-        <select id="treinoTipo">
-          <option value="treino">Treino</option>
-          <option value="jogo_treino">Jogo Treino</option>
-          <option value="outro">Outro</option>
-        </select>
-      </div>
+    <div class="form-row-2">
+      <div><label>Equipa</label><select id="treinoEscalao"></select></div>
+      <div><label>Data</label><input type="date" id="treinoData"></div>
     </div>
-    <div class="form-grid">
-      <div class="form-row"><label>Hora início</label><input type="time" id="treinoHoraI"></div>
-      <div class="form-row"><label>Hora fim</label><input type="time" id="treinoHoraF"></div>
+    <div class="form-row-2" style="margin-top:10px">
+      <div><label>Hora início</label><input type="time" id="treinoHoraI"></div>
+      <div><label>Hora fim</label><input type="time" id="treinoHoraF"></div>
     </div>
-    <div class="form-row"><label>Campo</label><input type="text" id="treinoCampo" placeholder="ex: Campo 1 e 2"></div>
-    <div class="form-row"><label>Balneário</label><input type="text" id="treinoBalneario" placeholder="ex: Balneário 3 e 4"></div>
-    <div class="form-row"><label>Observações</label><textarea id="treinoObs"></textarea></div>
-    <div class="modal-footer">
-      <button class="btn btn-danger btn-sm" id="deleteTreinoBtn" hidden>Eliminar</button>
-      <button class="btn btn-ghost" id="cancelTreinoBtn">Cancelar</button>
-      <button class="btn btn-primary" id="saveTreinoBtn">Guardar</button>
+    <div class="form-row"><label>Campo</label><select id="treinoCampo"><option value="">Seleccionar campo...</option></select></div>
+    <div class="form-row"><label>Balneário</label><select id="treinoBalneario"><option value="">Seleccionar balneário...</option></select></div>
+    <div class="form-row"><label>Tipo</label>
+      <select id="treinoTipo">
+        <option value="treino">Treino</option>
+        <option value="jogo_treino">Jogo Treino</option>
+        <option value="outro">Outro</option>
+      </select>
     </div>
-  </div>
-</div>
-
-<!-- MODAL LOGIN -->
-<div class="overlay" id="loginOverlay" hidden>
-  <div class="modal" style="max-width:360px">
-    <div class="login-logo">🔑 FutPlan</div>
-    <div class="login-sub">Acesso de administrador — Arões SC</div>
-    <div class="form-row"><label>Email</label><input type="email" id="loginEmail" placeholder="email@exemplo.com" autocomplete="email"></div>
-    <div class="form-row"><label>Palavra-passe</label><input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password"></div>
-    <div id="loginErr" style="color:var(--danger);font-size:12px;margin-bottom:8px;min-height:18px"></div>
-    <div class="modal-footer">
-      <button class="btn btn-ghost" id="cancelLoginBtn">Cancelar</button>
-      <button class="btn btn-primary" id="doLoginBtn">Entrar</button>
+    <div class="form-row"><label>Sub-equipa (A/B – Traq/Pet)</label>
+      <select id="treinoSubEquipa"><option value="">—</option><option value="A">A</option><option value="B">B</option></select></div>
+    <div class="form-row"><label>Observações</label><textarea id="treinoObs" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('treinoOverlay')">Cancelar</button>
+      <button class="btn-danger admin-only" id="treinoDeleteBtn" onclick="deleteTreino()" style="display:none">Eliminar</button>
+      <button class="btn-success" onclick="saveTreino()">Guardar</button>
     </div>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<!-- ===== OVERLAY EQUIPA ===== -->
+<div class="overlay" id="equipaOverlay">
+  <div class="modal">
+    <h3 id="equipaModalTitle">➕ Equipa</h3>
+    <input type="hidden" id="equipaId">
+    <div class="form-row-2">
+      <div><label>Nome</label><input type="text" id="equipaNome"></div>
+      <div><label>Abreviatura</label><input type="text" id="equipaAbrev" maxlength="4"></div>
+    </div>
+    <div class="form-row-2" style="margin-top:10px">
+      <div><label>Sub (ex: SUB 18/19)</label><input type="text" id="equipaSub"></div>
+      <div><label>Anos Nasc.</label><input type="text" id="equipaAnos"></div>
+    </div>
+    <div class="form-row-2" style="margin-top:10px">
+      <div><label>Cor</label><input type="color" id="equipaCor" value="#2563eb" style="height:40px;padding:3px"></div>
+      <div><label>Ordem</label><input type="number" id="equipaOrdem" value="1" min="1"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('equipaOverlay')">Cancelar</button>
+      <button class="btn-danger" id="equipaDeleteBtn" onclick="deleteEquipa()" style="display:none">Eliminar</button>
+      <button class="btn-primary" onclick="saveEquipa()">Guardar</button>
+    </div>
+  </div>
+</div>
 
-<!-- SUPABASE -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script>
-'use strict';
+<!-- ===== OVERLAY CAMPO ===== -->
+<div class="overlay" id="campoOverlay">
+  <div class="modal">
+    <h3 id="campoModalTitle">➕ Campo</h3>
+    <input type="hidden" id="campoId">
+    <div class="form-row"><label>Nome</label><input type="text" id="campoNome"></div>
+    <div class="form-row"><label>Localização</label><input type="text" id="campoLoc"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('campoOverlay')">Cancelar</button>
+      <button class="btn-danger" id="campoDeleteBtn" onclick="deleteCampo()" style="display:none">Eliminar</button>
+      <button class="btn-primary" onclick="saveCampo()">Guardar</button>
+    </div>
+  </div>
+</div>
 
-// ── CONFIG ──
-const SUPA_URL = 'https://ektzjdhqbgcbrvmhcqqj.supabase.co';
-const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrdHpqZGhxYmdjYnJ2bWhjcXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5Nzc4NDYsImV4cCI6MjEwOTU1Mzg0Nn0.ykcaGfalh5Ui6n-jJ0haD_RObF4ID46NBv0Pb285MDU';
-const sb = supabase.createClient(SUPA_URL, SUPA_KEY);
+<!-- ===== OVERLAY BALNEÁRIO ===== -->
+<div class="overlay" id="balnearioOverlay">
+  <div class="modal">
+    <h3 id="balnearioModalTitle">➕ Balneário</h3>
+    <input type="hidden" id="balnearioId">
+    <div class="form-row"><label>Nome</label><input type="text" id="balnearioNome"></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('balnearioOverlay')">Cancelar</button>
+      <button class="btn-danger" id="balnearioDeleteBtn" onclick="deleteBalneario()" style="display:none">Eliminar</button>
+      <button class="btn-primary" onclick="saveBalneario()">Guardar</button>
+    </div>
+  </div>
+</div>
 
-// ── STATE ──
-let escaloes = [], jogos = [], treinos = [];
+<!-- ===== OVERLAY ÉPOCA ===== -->
+<div class="overlay" id="epocaOverlay">
+  <div class="modal">
+    <h3 id="epocaModalTitle">➕ Época</h3>
+    <input type="hidden" id="epocaId">
+    <div class="form-row"><label>Nome (ex: 2026/2027)</label><input type="text" id="epocaNome"></div>
+    <div class="form-row"><label><input type="checkbox" id="epocaAtiva" style="width:auto;margin-right:6px">Época ativa</label></div>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeOverlay('epocaOverlay')">Cancelar</button>
+      <button class="btn-danger" id="epocaDeleteBtn" onclick="deleteEpoca()" style="display:none">Eliminar</button>
+      <button class="btn-primary" onclick="saveEpoca()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+// ===== SUPABASE CONFIG =====
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+const SB_URL = 'https://ektzjdhqbgcbrvmhcqqj.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVrdHpqZGhxYmdjYnJ2bWhjcXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM5Nzc4NDYsImV4cCI6MjEwOTU1Mzg0Nn0.ykcaGfalh5Ui6n-jJ0haD_RObF4ID46NBv0Pb285MDU';
+const sb = createClient(SB_URL, SB_KEY);
+
+// ===== STATE =====
+let escaloes = [], jogos = [], treinos = [], campos = [], balnearios = [], epocas = [];
 let isAdmin = false;
-let showOnlyWeekend = false;
-let mapDate = new Date(); mapDate.setDate(1);
-let microWeekStart = getMonday(new Date());
+let dragItem = null, dragType = null;
 
-// ── UTILS ──
-function isoDate(d) { return d.toISOString().slice(0,10); }
-function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate()+n); return r; }
-function parseDateLocal(s) { const [y,m,d]=s.split('-'); return new Date(+y,+m-1,+d); }
-function fmt(d, opts) { return new Intl.DateTimeFormat('pt-PT', opts).format(d); }
-function getMonday(d) {
-  const dt = new Date(d); const day = dt.getDay();
-  dt.setDate(dt.getDate() + (day===0 ? -6 : 1-day));
-  dt.setHours(0,0,0,0); return dt;
+// ===== UTILS =====
+function toast(msg, type='success'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='show '+type;
+  setTimeout(()=>t.className='',2800);
 }
-function showToast(msg, isErr=false) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = isErr ? '#dc2626' : '#1e293b';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2800);
+function fmtDate(d){
+  if(!d) return '';
+  const dt=new Date(d+'T00:00:00');
+  return dt.toLocaleDateString('pt-PT',{weekday:'short',day:'2-digit',month:'2-digit'});
 }
-
-// ── PWA ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+function fmtHora(h){
+  if(!h) return '';
+  return h.substring(0,5);
 }
-
-// ── AUTH ──
-async function initAuth() {
-  const { data } = await sb.auth.getSession();
-  isAdmin = !!data.session;
-  updateAuthUI();
+function getMonday(date){
+  const d=new Date(date);
+  const day=d.getDay();
+  const diff=d.getDate()-day+(day===0?-6:1);
+  d.setDate(diff);
+  return d;
 }
-function updateAuthUI() {
-  const btn = document.getElementById('authBtn');
-  btn.textContent = isAdmin ? '👤 Sair' : '🔑 Login';
-  btn.className = 'nav-btn ' + (isAdmin ? 'nav-btn-logout' : 'nav-btn-login');
-  document.querySelectorAll('.admin-only').forEach(el => el.hidden = !isAdmin);
+function formatWeekLabel(monday){
+  const fri=new Date(monday); fri.setDate(monday.getDate()+6);
+  const opts={day:'2-digit',month:'2-digit',year:'numeric'};
+  return monday.toLocaleDateString('pt-PT',opts)+' – '+fri.toLocaleDateString('pt-PT',opts);
 }
-sb.auth.onAuthStateChange((_, s) => { isAdmin = !!s; updateAuthUI(); });
-
-document.getElementById('authBtn').addEventListener('click', () => {
-  if (isAdmin) {
-    sb.auth.signOut().then(() => { isAdmin = false; updateAuthUI(); showToast('Sessão terminada'); });
-  } else {
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPw').value = '';
-    document.getElementById('loginErr').textContent = '';
-    document.getElementById('loginOverlay').hidden = false;
-    setTimeout(() => document.getElementById('loginEmail').focus(), 50);
-  }
+function getWeekDates(monday){
+  return Array.from({length:7},(_,i)=>{
+    const d=new Date(monday); d.setDate(monday.getDate()+i); return d;
+  });
+}
+function isoDate(d){
+  return d.toISOString().split('T')[0];
+}
+function closeOverlay(id){
+  document.getElementById(id).classList.remove('open');
+}
+function openOverlay(id){
+  document.getElementById(id).classList.add('open');
+}
+// Close overlay clicking outside
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('open'); });
 });
 
-// Login
-document.getElementById('cancelLoginBtn').addEventListener('click', () => { document.getElementById('loginOverlay').hidden = true; });
-document.getElementById('loginOverlay').addEventListener('click', e => { if (e.target===e.currentTarget) document.getElementById('loginOverlay').hidden=true; });
-async function doLogin() {
-  const email = document.getElementById('loginEmail').value.trim();
-  const pw = document.getElementById('loginPw').value;
-  const errEl = document.getElementById('loginErr');
-  errEl.textContent = '';
-  if (!email || !pw) { errEl.textContent = 'Preenche email e palavra-passe.'; return; }
-  document.getElementById('doLoginBtn').textContent = 'A entrar…';
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  document.getElementById('doLoginBtn').textContent = 'Entrar';
-  if (error) { errEl.textContent = error.message; }
-  else { document.getElementById('loginOverlay').hidden=true; showToast('Bem-vindo, admin!'); }
+// ===== AUTH =====
+window.openLogin = ()=>{ openOverlay('loginOverlay'); };
+window.doLogin = async()=>{
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const {error}=await sb.auth.signInWithPassword({email,password:pass});
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('loginOverlay');
+  toast('Login efectuado ✓');
+  setAdminUI(true);
+};
+window.doLogout = async()=>{
+  await sb.auth.signOut();
+  setAdminUI(false);
+  toast('Sessão terminada');
+};
+function setAdminUI(admin){
+  isAdmin=admin;
+  document.body.classList.toggle('logged-in',admin);
+  document.getElementById('loginBtn').style.display=admin?'none':'';
+  document.getElementById('logoutBtn').style.display=admin?'flex':'none';
+  document.querySelectorAll('.admin-only').forEach(el=>{
+    el.style.display=admin?(el.tagName==='BUTTON'?'flex':'flex'):'none';
+  });
+  if(admin){
+    document.getElementById('userInfo').style.display='block';
+    sb.auth.getUser().then(({data})=>{
+      if(data?.user) document.getElementById('userInfo').textContent=data.user.email;
+    });
+  } else {
+    document.getElementById('userInfo').style.display='none';
+  }
 }
-document.getElementById('doLoginBtn').addEventListener('click', doLogin);
-document.getElementById('loginPw').addEventListener('keydown', e => { if (e.key==='Enter') doLogin(); });
-document.getElementById('loginEmail').addEventListener('keydown', e => { if (e.key==='Enter') document.getElementById('loginPw').focus(); });
+sb.auth.onAuthStateChange((_ev,session)=>setAdminUI(!!session));
 
-// ── LOAD ──
-async function loadAll() {
-  const [{ data: e }, { data: j }, { data: t }] = await Promise.all([
+// ===== NAV TABS =====
+document.querySelectorAll('.nav-tab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+    tab.classList.add('active');
+    const id='tab-'+tab.dataset.tab;
+    document.getElementById(id)?.classList.add('active');
+    if(tab.dataset.tab==='pais') renderPais();
+    else if(tab.dataset.tab==='equipas') renderEquipasCrud();
+    else if(tab.dataset.tab==='campos') renderCamposCrud();
+    else if(tab.dataset.tab==='balnearios') renderBalneCrud();
+    else if(tab.dataset.tab==='epocas') renderEpocasCrud();
+  });
+});
+
+// ===== LOAD DATA =====
+async function loadAll(){
+  const [e,j,t,c,b,ep] = await Promise.all([
     sb.from('escaloes').select('*').order('ordem'),
     sb.from('jogos').select('*').order('data'),
     sb.from('treinos').select('*').order('data'),
+    sb.from('campos').select('*').order('nome'),
+    sb.from('balnearios').select('*').order('nome'),
+    sb.from('epocas').select('*').order('nome'),
   ]);
-  escaloes = e||[]; jogos = j||[]; treinos = t||[];
-  populateSelects();
+  escaloes=e.data||[]; jogos=j.data||[]; treinos=t.data||[];
+  campos=c.data||[]; balnearios=b.data||[]; epocas=ep.data||[];
+  buildMonthSelector();
+  buildWeekSelector();
+  populatePaisFilters();
   renderMapa();
-  renderMicro();
+  buildLegenda('mapaLegenda');
+  buildLegenda('microLegenda');
 }
 
-function populateSelects() {
-  const opts = escaloes.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
-  document.getElementById('jogoEscalao').innerHTML = opts;
-  document.getElementById('treinoEscalao').innerHTML = opts;
+// ===== MONTH SELECTOR =====
+function buildMonthSelector(){
+  const sel=document.getElementById('mapaMonth');
+  const months=new Set();
+  jogos.forEach(j=>{ if(j.data) months.add(j.data.substring(0,7)); });
+  treinos.forEach(t=>{ if(t.data) months.add(t.data.substring(0,7)); });
+  const now=new Date();
+  const cur=now.toISOString().substring(0,7);
+  if(!months.has(cur)) months.add(cur);
+  const sorted=[...months].sort();
+  sel.innerHTML=sorted.map(m=>{
+    const [y,mo]=m.split('-');
+    const label=new Date(y,mo-1,1).toLocaleDateString('pt-PT',{month:'long',year:'numeric'});
+    return `<option value="${m}" ${m===cur?'selected':''}>${label.charAt(0).toUpperCase()+label.slice(1)}</option>`;
+  }).join('');
 }
 
-// ── MAPA MENSAL ──
-function renderMapa() {
-  const y=mapDate.getFullYear(), m=mapDate.getMonth();
-  document.getElementById('monthLabel').textContent = fmt(mapDate,{month:'long',year:'numeric'});
+// ===== WEEK SELECTOR =====
+function buildWeekSelector(){
+  const sel=document.getElementById('microWeek');
+  const weeks=new Set();
+  treinos.forEach(t=>{
+    if(t.data){ const m=getMonday(t.data); weeks.add(isoDate(m)); }
+  });
+  jogos.forEach(j=>{
+    if(j.data){ const m=getMonday(j.data); weeks.add(isoDate(m)); }
+  });
+  const now=new Date();
+  const curMonday=isoDate(getMonday(now));
+  if(!weeks.has(curMonday)) weeks.add(curMonday);
+  const sorted=[...weeks].sort();
+  sel.innerHTML=sorted.map(w=>{
+    const mon=new Date(w+'T00:00:00');
+    return `<option value="${w}" ${w===curMonday?'selected':''}>${formatWeekLabel(mon)}</option>`;
+  }).join('');
+}
 
-  const firstDay=new Date(y,m,1), lastDay=new Date(y,m+1,0);
-  const isoSet = new Set();
-  for (let d=new Date(firstDay); d<=lastDay; d.setDate(d.getDate()+1)) {
-    const iso = isoDate(d);
-    const dow = d.getDay();
-    if (!showOnlyWeekend || dow===6 || dow===0) {
-      if (dow===6||dow===0||jogos.some(j=>j.data===iso)) isoSet.add(iso);
-    }
+// ===== LEGENDA =====
+function buildLegenda(elId){
+  const el=document.getElementById(elId);
+  el.innerHTML=escaloes.filter(e=>e.ativo!==false).map(e=>
+    `<span class="legenda-item" style="background:${e.cor};color:${e.cor_texto||'#fff'}">${e.nome}</span>`
+  ).join('');
+}
+
+// ===== POPULATE SELECTS =====
+function populateSelects(){
+  // Escalões nos modais
+  ['jogoEscalao','treinoEscalao'].forEach(id=>{
+    document.getElementById(id).innerHTML=escaloes
+      .filter(e=>e.ativo!==false)
+      .map(e=>`<option value="${e.id}">${e.nome}</option>`).join('');
+  });
+  // Campos
+  document.getElementById('jogoLocal').innerHTML=
+    `<option value="">Seleccionar campo...</option>`+
+    campos.map(c=>`<option value="${c.nome}">${c.nome}${c.localizacao?' – '+c.localizacao:''}</option>`).join('');
+  document.getElementById('treinoCampo').innerHTML=
+    `<option value="">Seleccionar campo...</option>`+
+    campos.map(c=>`<option value="${c.nome}">${c.nome}</option>`).join('');
+  // Balneários
+  document.getElementById('treinoBalneario').innerHTML=
+    `<option value="">Seleccionar balneário...</option>`+
+    balnearios.map(b=>`<option value="${b.nome}">${b.nome}</option>`).join('');
+}
+
+// ===== RENDER MAPA MENSAL =====
+window.renderMapa = function(){
+  const ym=document.getElementById('mapaMonth').value;
+  if(!ym) return;
+  const [year,month]=ym.split('-').map(Number);
+  const daysInMonth=new Date(year,month,0).getDate();
+  // Collect all dates that have events or are weekends
+  const allDates=[];
+  for(let d=1;d<=daysInMonth;d++){
+    const dt=new Date(year,month-1,d);
+    const dow=dt.getDay();
+    if(dow===0||dow===6) allDates.push(isoDate(dt));
   }
-  const dates = [...isoSet].sort().map(parseDateLocal);
-
-  let html = `<table class="mapa-table">
-    <thead><tr>
-      <th class="col-esc">Equipa</th>
-      ${dates.map(d=>`<th class="col-date">${fmt(d,{weekday:'short'}).toUpperCase()}<br><span style="font-size:11px;font-family:Inter,sans-serif;font-weight:500">${fmt(d,{day:'2-digit',month:'2-digit',year:'numeric'})}</span></th>`).join('')}
-    </tr></thead>
-    <tbody>`;
-
-  escaloes.filter(e=>e.ativo).forEach(esc => {
-    html += `<tr><td class="col-esc">
-      <div class="esc-nome" style="color:${esc.cor||'var(--accent2)'}">${esc.nome}</div>
-      ${esc.sub?`<div class="esc-sub">${esc.sub}${esc.ano_nasc?' '+esc.ano_nasc:''}</div>`:''}
-    </td>`;
-    dates.forEach(d => {
-      const iso = isoDate(d);
-      const dj = jogos.filter(j=>j.escalao_id===esc.id&&j.data===iso);
-      const chips = dj.map(j=>`<button class="jogo-chip chip-${j.casa_fora} chip-${j.estado||'agendado'}" onclick="editJogo(${j.id})">
-        ${j.jornada?`<div class="jornada">JORNADA ${j.jornada}</div>`:''}
-        <div class="adversario">${j.adversario} (${j.casa_fora})</div>
-        ${j.hora?`<div class="hora">⏰ ${j.hora.slice(0,5)}</div>`:''}
-        ${j.local?`<div class="hora">📍 ${j.local}</div>`:''}
-      </button>`).join('');
-      const addBtn = isAdmin ? `<button class="cell-add" onclick="newJogo(${esc.id},'${iso}')">+</button>` : '';
-      html += `<td><div class="cell-inner">${chips}</div>${addBtn}</td>`;
-    });
-    html += '</tr>';
+  // Also include dates with treinos in midweek
+  treinos.forEach(t=>{
+    if(t.data&&t.data.startsWith(ym)&&!allDates.includes(t.data)) allDates.push(t.data);
   });
-  html += '</tbody></table>';
-  document.getElementById('mapaWrap').innerHTML = html;
-}
-
-document.getElementById('prevMonth').addEventListener('click', ()=>{ mapDate.setMonth(mapDate.getMonth()-1); renderMapa(); });
-document.getElementById('nextMonth').addEventListener('click', ()=>{ mapDate.setMonth(mapDate.getMonth()+1); renderMapa(); });
-document.getElementById('toggleWeekend').addEventListener('click', function(){
-  showOnlyWeekend=!showOnlyWeekend;
-  this.textContent = showOnlyWeekend ? 'Todos os dias' : 'Só fins-de-semana';
-  renderMapa();
-});
-
-// ── MICROCICLO ──
-function renderMicro() {
-  const days = Array.from({length:7},(_,i)=>addDays(microWeekStart,i));
-  const dayNames = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
-  document.getElementById('semanaLabel').textContent =
-    `${fmt(days[0],{day:'2-digit',month:'short'})} – ${fmt(days[6],{day:'2-digit',month:'short',year:'numeric'})}`;
-
-  let html = `<table class="micro-table">
-    <thead><tr>
-      <th class="col-esc">Equipa</th>
-      ${days.map((d,i)=>`<th>${dayNames[i]}<br><span style="font-size:11px;font-family:Inter,sans-serif;font-weight:500">${fmt(d,{day:'2-digit',month:'2-digit'})}</span></th>`).join('')}
-    </tr></thead>
-    <tbody>`;
-
-  escaloes.filter(e=>e.ativo).forEach(esc => {
-    html += `<tr><td class="col-esc">
-      <div class="esc-nome" style="color:${esc.cor||'var(--accent2)'}">${esc.nome}</div>
-      ${esc.sub?`<div class="esc-sub">${esc.sub}</div>`:''}
-    </td>`;
-    days.forEach(d => {
-      const iso = isoDate(d);
-      const dt = treinos.filter(t=>t.escalao_id===esc.id&&t.data===iso);
-      const chips = dt.map(t=>{
-        const hi=t.hora_inicio?t.hora_inicio.slice(0,5):'';
-        const hf=t.hora_fim?t.hora_fim.slice(0,5):'';
-        const hora = hi?(hf?`${hi}–${hf}`:hi):'';
-        const local=[t.campo&&`Campo: ${t.campo}`,t.balneario&&`Bal.: ${t.balneario}`].filter(Boolean).join(' · ');
-        const tipo=t.tipo==='jogo_treino'?'jogo_treino':'';
-        return `<button class="treino-chip ${tipo}" onclick="editTreino(${t.id})">
-          ${hora?`<div class="hora">${t.tipo==='jogo_treino'?'⚽ ':'🏃 '}${hora}</div>`:''}
-          ${local?`<div class="local">${local}</div>`:''}
-          ${t.observacoes?`<div class="local" style="font-style:italic">${t.observacoes}</div>`:''}
-        </button>`;
-      }).join('');
-      const addBtn = isAdmin ? `<button class="cell-add" onclick="newTreino(${esc.id},'${iso}')">+</button>` : '';
-      html += `<td><div style="min-height:60px;padding:2px 0">${chips}</div>${addBtn}</td>`;
-    });
-    html += '</tr>';
+  jogos.forEach(j=>{
+    if(j.data&&j.data.startsWith(ym)&&!allDates.includes(j.data)) allDates.push(j.data);
   });
-  html += '</tbody></table>';
-  document.getElementById('microWrap').innerHTML = html;
+  allDates.sort();
+
+  const activeEscaloes=escaloes.filter(e=>e.ativo!==false);
+  const cols=allDates;
+
+  let html=`<table class="sched-table"><thead><tr>
+    <th class="team-col">Equipa</th>
+    ${cols.map(d=>{
+      const dt=new Date(d+'T00:00:00');
+      const dow=dt.toLocaleDateString('pt-PT',{weekday:'short'});
+      const dnum=dt.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});
+      return `<th>${dow}<br>${dnum}</th>`;
+    }).join('')}
+  </tr></thead><tbody>`;
+
+  activeEscaloes.forEach(esc=>{
+    const cor=esc.cor||'#3b82f6';
+    const corTxt=esc.cor_texto||'#fff';
+    // Traquinas / Petizes têm sub-equipa A e B
+    const hasSubTeams=(esc.nome==='Traquinas'||esc.nome==='Petizes');
+    if(hasSubTeams){
+      // Linha A
+      html+=buildMapaRow(esc,cols,'A',cor,corTxt,true);
+      // Linha B
+      html+=buildMapaRow(esc,cols,'B',cor,corTxt,false);
+    } else {
+      html+=buildMapaRow(esc,cols,null,cor,corTxt,true);
+    }
+  });
+
+  html+='</tbody></table>';
+  document.getElementById('mapaTable').innerHTML=html;
+  attachDragDrop();
+};
+
+function buildMapaRow(esc,cols,sub,cor,corTxt,showName){
+  const nameCell=showName
+    ?`<td class="team-name-cell" style="border-left:4px solid ${cor}" rowspan="${sub?1:1}">
+        <div style="color:${cor};font-size:.85rem">${esc.nome}</div>
+        ${esc.sub?`<div style="font-size:.7rem;color:#6b7280">${esc.sub}</div>`:''}
+        ${sub?`<div style="font-size:.7rem;font-weight:700;color:${cor}">Sub-equipa ${sub}</div>`:''}
+      </td>`
+    :`<td class="team-name-cell" style="border-left:4px solid ${cor}">
+        <div style="font-size:.7rem;font-weight:700;color:${cor}">Sub-equipa ${sub}</div>
+      </td>`;
+
+  const cells=cols.map(date=>{
+    const cellJogos=jogos.filter(j=>
+      j.escalao_id===esc.id && j.data===date &&
+      (sub?j.sub_equipa===sub:!j.sub_equipa||j.sub_equipa===null||j.sub_equipa==='')
+    );
+    const addBtn=isAdmin?`<button class="btn-add-cell" onclick="openJogoModal(null,'${esc.id}','${date}','${sub||''}')">+ Jogo</button>`:'';
+    const cards=cellJogos.map(j=>buildJogoCard(j,esc)).join('');
+    return `<td class="drop-zone" data-escalao="${esc.id}" data-date="${date}" data-sub="${sub||''}" data-type="jogo">${cards}${addBtn}</td>`;
+  }).join('');
+
+  return `<tr>${nameCell}${cells}</tr>`;
 }
 
-document.getElementById('prevSemana').addEventListener('click', ()=>{ microWeekStart=addDays(microWeekStart,-7); renderMicro(); });
-document.getElementById('nextSemana').addEventListener('click', ()=>{ microWeekStart=addDays(microWeekStart,7); renderMicro(); });
+// ===== BUILD JOGO CARD =====
+function buildJogoCard(j,esc){
+  const cor=esc?.cor||'#3b82f6';
+  const corTxt=esc?.cor_texto||'#fff';
+  const hora=fmtHora(j.hora);
+  const cf=j.casa_fora==='C'?'(C)':'(F)';
 
-// ── JOGO MODAL ──
-function openJogoModal(title, j, escId, data) {
-  document.getElementById('jogoModalTitle').textContent = title;
-  document.getElementById('jogoId').value = j?j.id:'';
-  document.getElementById('jogoEscalao').value = j?j.escalao_id:(escId||escaloes[0]?.id||'');
-  document.getElementById('jogoData').value = j?j.data:(data||isoDate(new Date()));
-  document.getElementById('jogoHora').value = j?.hora?j.hora.slice(0,5):'';
-  document.getElementById('jogoJornada').value = j?.jornada||'';
-  document.getElementById('jogoCasaFora').value = j?.casa_fora||'C';
-  document.getElementById('jogoAdversario').value = j?.adversario||'';
-  document.getElementById('jogoLocal').value = j?.local||'';
-  document.getElementById('jogoEstado').value = j?.estado||'agendado';
-  document.getElementById('jogoResNos').value = j?.resultado_nos??'';
-  document.getElementById('jogoResAdv').value = j?.resultado_adv??'';
-  document.getElementById('jogoObs').value = j?.observacoes||'';
-  document.getElementById('deleteJogoBtn').hidden = !j;
-  document.getElementById('jogoOverlay').hidden = false;
-  setTimeout(()=>document.getElementById('jogoAdversario').focus(),50);
+  let tipoLabel='';
+  let subPrefix='';
+  if(j.sub_equipa) subPrefix=j.sub_equipa+' ';
+
+  if(j.tipo_jogo==='jornada'||!j.tipo_jogo){
+    tipoLabel=j.jornada?`${subPrefix}JORNADA ${j.jornada}`:`${subPrefix}JORNADA`;
+  } else if(j.tipo_jogo==='taca'){
+    tipoLabel=j.jornada?`${subPrefix}TAÇA ELIM. ${j.jornada}`:`${subPrefix}TAÇA`;
+  } else if(j.tipo_jogo==='jogo_treino'){
+    tipoLabel=j.jornada?`${subPrefix}A JOGO ${j.jornada}`:`${subPrefix}JOGO TREINO`;
+  } else if(j.tipo_jogo==='isento'){
+    tipoLabel=`${subPrefix}ISENTO`;
+  }
+
+  // Cor por estado
+  let bgCor=cor;
+  if(j.estado==='adiado') bgCor='#78716c';
+  if(j.estado==='cancelado') bgCor='#9ca3af';
+
+  const local=j.campo_nome||j.local||'';
+  const editBtn=isAdmin?`<div class="card-actions">
+    <button onclick="openJogoModal(${j.id})">✏️</button>
+  </div>`:'';
+
+  if(j.tipo_jogo==='isento'){
+    return `<div class="card-item card-jogo" draggable="${isAdmin}" data-id="${j.id}" data-type="jogo"
+      style="background:${bgCor};color:${corTxt}">
+      ${editBtn}
+      <div class="card-tipo">${tipoLabel}</div>
+    </div>`;
+  }
+
+  return `<div class="card-item card-jogo" draggable="${isAdmin}" data-id="${j.id}" data-type="jogo"
+    style="background:${bgCor};color:${corTxt}">
+    ${editBtn}
+    <div class="card-tipo">${tipoLabel}</div>
+    <div class="card-adv">${j.adversario||''} ${cf}</div>
+    <div class="card-hora">${hora}</div>
+    ${local?`<div class="card-local">${local}</div>`:''}
+  </div>`;
 }
-function newJogo(escId, data) { if(!isAdmin) return; openJogoModal('Novo Jogo', null, escId, data); }
-function editJogo(id) { if(!isAdmin) return; openJogoModal('Editar Jogo', jogos.find(x=>x.id===id)); }
 
-document.getElementById('addJogoBtn').addEventListener('click', ()=>newJogo(escaloes[0]?.id, isoDate(new Date())));
-document.getElementById('cancelJogoBtn').addEventListener('click', ()=>{ document.getElementById('jogoOverlay').hidden=true; });
-document.getElementById('jogoOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) document.getElementById('jogoOverlay').hidden=true; });
+// ===== RENDER MICROCICLO =====
+window.renderMicro = function(){
+  const mondayStr=document.getElementById('microWeek').value;
+  if(!mondayStr) return;
+  const monday=new Date(mondayStr+'T00:00:00');
+  const weekDates=getWeekDates(monday);
+  const dayNames=['Segunda','Terça','Quarta','Quinta','Sexta','Sábado','Domingo'];
+  const activeEscaloes=escaloes.filter(e=>e.ativo!==false);
 
-document.getElementById('saveJogoBtn').addEventListener('click', async()=>{
-  const id = document.getElementById('jogoId').value;
-  const adv = document.getElementById('jogoAdversario').value.trim();
-  if(!adv) { showToast('Preenche o adversário', true); return; }
-  const payload = {
-    escalao_id: +document.getElementById('jogoEscalao').value,
-    data: document.getElementById('jogoData').value,
-    hora: document.getElementById('jogoHora').value||null,
-    jornada: document.getElementById('jogoJornada').value?+document.getElementById('jogoJornada').value:null,
-    casa_fora: document.getElementById('jogoCasaFora').value,
-    adversario: adv,
-    local: document.getElementById('jogoLocal').value.trim()||null,
-    estado: document.getElementById('jogoEstado').value,
-    resultado_nos: document.getElementById('jogoResNos').value!==''?+document.getElementById('jogoResNos').value:null,
-    resultado_adv: document.getElementById('jogoResAdv').value!==''?+document.getElementById('jogoResAdv').value:null,
-    observacoes: document.getElementById('jogoObs').value.trim()||null,
+  let html=`<table class="sched-table"><thead><tr>
+    <th class="team-col">Equipa</th>
+    ${weekDates.map((d,i)=>{
+      const dnum=d.toLocaleDateString('pt-PT',{day:'2-digit',month:'2-digit'});
+      return `<th>${dayNames[i]}<br>${dnum}</th>`;
+    }).join('')}
+  </tr></thead><tbody>`;
+
+  activeEscaloes.forEach(esc=>{
+    const cor=esc.cor||'#3b82f6';
+    const corTxt=esc.cor_texto||'#fff';
+    const hasSubTeams=(esc.nome==='Traquinas'||esc.nome==='Petizes');
+
+    if(hasSubTeams){
+      html+=buildMicroRow(esc,weekDates,'A',cor,corTxt,true);
+      html+=buildMicroRow(esc,weekDates,'B',cor,corTxt,false);
+    } else {
+      html+=buildMicroRow(esc,weekDates,null,cor,corTxt,true);
+    }
+  });
+
+  html+='</tbody></table>';
+  document.getElementById('microTable').innerHTML=html;
+  attachDragDrop();
+};
+
+function buildMicroRow(esc,weekDates,sub,cor,corTxt,showName){
+  const nameCell=showName
+    ?`<td class="team-name-cell" style="border-left:4px solid ${cor}">
+        <div style="color:${cor};font-size:.85rem">${esc.nome}</div>
+        ${esc.sub?`<div style="font-size:.7rem;color:#6b7280">${esc.sub}</div>`:''}
+        ${sub?`<div style="font-size:.7rem;font-weight:700;color:${cor}">Sub-eq. ${sub}</div>`:''}
+      </td>`
+    :`<td class="team-name-cell" style="border-left:4px solid ${cor}">
+        <div style="font-size:.7rem;font-weight:700;color:${cor}">Sub-eq. ${sub}</div>
+      </td>`;
+
+  const cells=weekDates.map(date=>{
+    const dateStr=isoDate(date);
+    // Treinos
+    const cellTreinos=treinos.filter(t=>
+      t.escalao_id===esc.id && t.data===dateStr &&
+      (sub?t.sub_equipa===sub:!t.sub_equipa||t.sub_equipa===null||t.sub_equipa==='')
+    );
+    // Jogos neste dia
+    const cellJogos=jogos.filter(j=>
+      j.escalao_id===esc.id && j.data===dateStr &&
+      (sub?j.sub_equipa===sub:!j.sub_equipa||j.sub_equipa===null||j.sub_equipa==='')
+    );
+    const addBtnT=isAdmin?`<button class="btn-add-cell" onclick="openTreinoModal(null,'${esc.id}','${dateStr}','${sub||''}')">+ Treino</button>`:'';
+    const addBtnJ=isAdmin?`<button class="btn-add-cell" onclick="openJogoModal(null,'${esc.id}','${dateStr}','${sub||''}')">+ Jogo</button>`:'';
+    const tCards=cellTreinos.map(t=>buildTreinoCard(t,esc)).join('');
+    const jCards=cellJogos.map(j=>buildJogoCard(j,esc)).join('');
+    return `<td class="drop-zone" data-escalao="${esc.id}" data-date="${dateStr}" data-sub="${sub||''}" data-type="both">
+      ${tCards}${jCards}${addBtnT}${addBtnJ}
+    </td>`;
+  }).join('');
+
+  return `<tr>${nameCell}${cells}</tr>`;
+}
+
+// ===== BUILD TREINO CARD =====
+function buildTreinoCard(t,esc){
+  const cor=esc?.cor||'#3b82f6';
+  const horaI=fmtHora(t.hora_inicio);
+  const horaF=fmtHora(t.hora_fim);
+  const tipoLabel=t.tipo==='jogo_treino'?'JT':'TREINO';
+  const editBtn=isAdmin?`<div class="card-actions">
+    <button onclick="openTreinoModal(${t.id})" style="background:rgba(0,0,0,.2);color:#333">✏️</button>
+  </div>`:'';
+
+  return `<div class="card-item card-treino" draggable="${isAdmin}" data-id="${t.id}" data-type="treino"
+    style="border-left-color:${cor}">
+    ${editBtn}
+    <div class="card-tipo" style="color:${cor}">${tipoLabel}</div>
+    <div class="card-hora">${horaI}${horaF?' – '+horaF:''}</div>
+    ${t.campo?`<div class="card-campo">📍 ${t.campo}</div>`:''}
+    ${t.balneario?`<div class="card-balneario">🚿 ${t.balneario}</div>`:''}
+    ${t.observacoes?`<div class="card-balneario" style="font-style:italic">${t.observacoes}</div>`:''}
+  </div>`;
+}
+
+// ===== DRAG AND DROP =====
+function attachDragDrop(){
+  document.querySelectorAll('.card-item[draggable="true"]').forEach(card=>{
+    card.addEventListener('dragstart',e=>{
+      dragItem={id:parseInt(card.dataset.id),type:card.dataset.type};
+      card.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    card.addEventListener('dragend',()=>card.classList.remove('dragging'));
+  });
+
+  document.querySelectorAll('.drop-zone').forEach(zone=>{
+    zone.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      zone.classList.add('drag-over');
+    });
+    zone.addEventListener('dragleave',()=>zone.classList.remove('drag-over'));
+    zone.addEventListener('drop',async e=>{
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      if(!dragItem||!isAdmin) return;
+      const newDate=zone.dataset.date;
+      const newEscalao=parseInt(zone.dataset.escalao);
+      const newSub=zone.dataset.sub||null;
+      if(dragItem.type==='jogo'){
+        const {error}=await sb.from('jogos').update({
+          data:newDate, escalao_id:newEscalao, sub_equipa:newSub||null
+        }).eq('id',dragItem.id);
+        if(error){ toast('Erro ao mover jogo','error'); return; }
+        jogos=jogos.map(j=>j.id===dragItem.id?{...j,data:newDate,escalao_id:newEscalao,sub_equipa:newSub||null}:j);
+        toast('Jogo movido ✓');
+      } else if(dragItem.type==='treino'){
+        const {error}=await sb.from('treinos').update({
+          data:newDate, escalao_id:newEscalao, sub_equipa:newSub||null
+        }).eq('id',dragItem.id);
+        if(error){ toast('Erro ao mover treino','error'); return; }
+        treinos=treinos.map(t=>t.id===dragItem.id?{...t,data:newDate,escalao_id:newEscalao,sub_equipa:newSub||null}:t);
+        toast('Treino movido ✓');
+      }
+      dragItem=null;
+      // Re-render
+      const activeTab=document.querySelector('.nav-tab.active')?.dataset.tab;
+      if(activeTab==='mapa') renderMapa();
+      else if(activeTab==='micro') renderMicro();
+    });
+  });
+}
+
+// ===== JOGO MODAL =====
+window.openJogoModal = async function(id=null, escalaoId=null, date=null, sub=null){
+  populateSelects();
+  document.getElementById('jogoId').value=id||'';
+  document.getElementById('jogoDeleteBtn').style.display=id?'flex':'none';
+  document.getElementById('jogoModalTitle').textContent=id?'✏️ Editar Jogo':'➕ Adicionar Jogo';
+  if(id){
+    const j=jogos.find(x=>x.id===id);
+    if(!j) return;
+    document.getElementById('jogoEscalao').value=j.escalao_id;
+    document.getElementById('jogoData').value=j.data;
+    document.getElementById('jogoHora').value=j.hora?j.hora.substring(0,5):'';
+    document.getElementById('jogoCasaFora').value=j.casa_fora||'C';
+    document.getElementById('jogoTipo').value=j.tipo_jogo||'jornada';
+    document.getElementById('jogoJornada').value=j.jornada||j.num_jogo||'';
+    document.getElementById('jogoSubEquipa').value=j.sub_equipa||'';
+    document.getElementById('jogoAdversario').value=j.adversario||'';
+    document.getElementById('jogoLocal').value=j.campo_nome||j.local||'';
+    document.getElementById('jogoEstado').value=j.estado||'agendado';
+    document.getElementById('jogoObs').value=j.observacoes||'';
+  } else {
+    document.getElementById('jogoEscalao').value=escalaoId||escaloes[0]?.id||'';
+    document.getElementById('jogoData').value=date||new Date().toISOString().split('T')[0];
+    document.getElementById('jogoHora').value='';
+    document.getElementById('jogoCasaFora').value='C';
+    document.getElementById('jogoTipo').value='jornada';
+    document.getElementById('jogoJornada').value='';
+    document.getElementById('jogoSubEquipa').value=sub||'';
+    document.getElementById('jogoAdversario').value='';
+    document.getElementById('jogoLocal').value='';
+    document.getElementById('jogoEstado').value='agendado';
+    document.getElementById('jogoObs').value='';
+  }
+  openOverlay('jogoOverlay');
+};
+
+window.saveJogo = async function(){
+  const id=document.getElementById('jogoId').value;
+  const data={
+    escalao_id:parseInt(document.getElementById('jogoEscalao').value),
+    data:document.getElementById('jogoData').value,
+    hora:document.getElementById('jogoHora').value||null,
+    casa_fora:document.getElementById('jogoCasaFora').value,
+    tipo_jogo:document.getElementById('jogoTipo').value,
+    jornada:parseInt(document.getElementById('jogoJornada').value)||null,
+    num_jogo:parseInt(document.getElementById('jogoJornada').value)||null,
+    sub_equipa:document.getElementById('jogoSubEquipa').value||null,
+    adversario:document.getElementById('jogoAdversario').value,
+    campo_nome:document.getElementById('jogoLocal').value||null,
+    local:document.getElementById('jogoLocal').value||null,
+    estado:document.getElementById('jogoEstado').value,
+    observacoes:document.getElementById('jogoObs').value||null,
+    updated_at:new Date().toISOString()
   };
-  document.getElementById('saveJogoBtn').textContent='A guardar…';
-  const { error } = id
-    ? await sb.from('jogos').update(payload).eq('id',id)
-    : await sb.from('jogos').insert(payload);
-  document.getElementById('saveJogoBtn').textContent='Guardar';
-  if(error) { showToast('Erro: '+error.message, true); return; }
-  document.getElementById('jogoOverlay').hidden=true;
-  showToast(id?'Jogo atualizado':'Jogo adicionado');
-  await loadAll();
-});
+  if(!data.data||!data.escalao_id){ toast('Preencha equipa e data','error'); return; }
+  let error;
+  if(id){
+    ({error}=await sb.from('jogos').update(data).eq('id',id));
+    if(!error) jogos=jogos.map(j=>j.id===parseInt(id)?{...j,...data,id:parseInt(id)}:j);
+  } else {
+    const r=await sb.from('jogos').insert(data).select().single();
+    error=r.error;
+    if(!error) jogos.push(r.data);
+  }
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('jogoOverlay');
+  toast(id?'Jogo actualizado ✓':'Jogo adicionado ✓');
+  const activeTab=document.querySelector('.nav-tab.active')?.dataset.tab;
+  if(activeTab==='mapa') renderMapa(); else renderMicro();
+};
 
-document.getElementById('deleteJogoBtn').addEventListener('click', async()=>{
+window.deleteJogo = async function(){
   const id=document.getElementById('jogoId').value;
   if(!id||!confirm('Eliminar este jogo?')) return;
-  await sb.from('jogos').delete().eq('id',id);
-  document.getElementById('jogoOverlay').hidden=true;
-  showToast('Jogo eliminado');
-  await loadAll();
-});
+  const {error}=await sb.from('jogos').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  jogos=jogos.filter(j=>j.id!==parseInt(id));
+  closeOverlay('jogoOverlay');
+  toast('Jogo eliminado');
+  const activeTab=document.querySelector('.nav-tab.active')?.dataset.tab;
+  if(activeTab==='mapa') renderMapa(); else renderMicro();
+};
 
-// ── TREINO MODAL ──
-function openTreinoModal(title, t, escId, data) {
-  document.getElementById('treinoModalTitle').textContent = title;
-  document.getElementById('treinoId').value = t?t.id:'';
-  document.getElementById('treinoEscalao').value = t?t.escalao_id:(escId||escaloes[0]?.id||'');
-  document.getElementById('treinoData').value = t?t.data:(data||isoDate(new Date()));
-  document.getElementById('treinoHoraI').value = t?.hora_inicio?t.hora_inicio.slice(0,5):'';
-  document.getElementById('treinoHoraF').value = t?.hora_fim?t.hora_fim.slice(0,5):'';
-  document.getElementById('treinoCampo').value = t?.campo||'';
-  document.getElementById('treinoBalneario').value = t?.balneario||'';
-  document.getElementById('treinoTipo').value = t?.tipo||'treino';
-  document.getElementById('treinoObs').value = t?.observacoes||'';
-  document.getElementById('deleteTreinoBtn').hidden = !t;
-  document.getElementById('treinoOverlay').hidden = false;
-}
-function newTreino(escId, data) { if(!isAdmin) return; openTreinoModal('Novo Treino', null, escId, data); }
-function editTreino(id) { if(!isAdmin) return; openTreinoModal('Editar Treino', treinos.find(x=>x.id===id)); }
+// ===== TREINO MODAL =====
+window.openTreinoModal = async function(id=null, escalaoId=null, date=null, sub=null){
+  populateSelects();
+  document.getElementById('treinoId').value=id||'';
+  document.getElementById('treinoDeleteBtn').style.display=id?'flex':'none';
+  document.getElementById('treinoModalTitle').textContent=id?'✏️ Editar Treino':'➕ Adicionar Treino';
+  if(id){
+    const t=treinos.find(x=>x.id===id);
+    if(!t) return;
+    document.getElementById('treinoEscalao').value=t.escalao_id;
+    document.getElementById('treinoData').value=t.data;
+    document.getElementById('treinoHoraI').value=t.hora_inicio?t.hora_inicio.substring(0,5):'';
+    document.getElementById('treinoHoraF').value=t.hora_fim?t.hora_fim.substring(0,5):'';
+    document.getElementById('treinoCampo').value=t.campo||'';
+    document.getElementById('treinoBalneario').value=t.balneario||t.balneario_nome||'';
+    document.getElementById('treinoTipo').value=t.tipo||'treino';
+    document.getElementById('treinoSubEquipa').value=t.sub_equipa||'';
+    document.getElementById('treinoObs').value=t.observacoes||'';
+  } else {
+    document.getElementById('treinoEscalao').value=escalaoId||escaloes[0]?.id||'';
+    document.getElementById('treinoData').value=date||new Date().toISOString().split('T')[0];
+    document.getElementById('treinoHoraI').value='';
+    document.getElementById('treinoHoraF').value='';
+    document.getElementById('treinoCampo').value='';
+    document.getElementById('treinoBalneario').value='';
+    document.getElementById('treinoTipo').value='treino';
+    document.getElementById('treinoSubEquipa').value=sub||'';
+    document.getElementById('treinoObs').value='';
+  }
+  openOverlay('treinoOverlay');
+};
 
-document.getElementById('addTreinoBtn').addEventListener('click', ()=>newTreino(escaloes[0]?.id, isoDate(microWeekStart)));
-document.getElementById('cancelTreinoBtn').addEventListener('click', ()=>{ document.getElementById('treinoOverlay').hidden=true; });
-document.getElementById('treinoOverlay').addEventListener('click', e=>{ if(e.target===e.currentTarget) document.getElementById('treinoOverlay').hidden=true; });
-
-document.getElementById('saveTreinoBtn').addEventListener('click', async()=>{
-  const id = document.getElementById('treinoId').value;
-  if(!document.getElementById('treinoData').value) { showToast('Escolhe uma data', true); return; }
-  const payload = {
-    escalao_id: +document.getElementById('treinoEscalao').value,
-    data: document.getElementById('treinoData').value,
-    hora_inicio: document.getElementById('treinoHoraI').value||null,
-    hora_fim: document.getElementById('treinoHoraF').value||null,
-    campo: document.getElementById('treinoCampo').value.trim()||null,
-    balneario: document.getElementById('treinoBalneario').value.trim()||null,
-    tipo: document.getElementById('treinoTipo').value,
-    observacoes: document.getElementById('treinoObs').value.trim()||null,
+window.saveTreino = async function(){
+  const id=document.getElementById('treinoId').value;
+  const data={
+    escalao_id:parseInt(document.getElementById('treinoEscalao').value),
+    data:document.getElementById('treinoData').value,
+    hora_inicio:document.getElementById('treinoHoraI').value||null,
+    hora_fim:document.getElementById('treinoHoraF').value||null,
+    campo:document.getElementById('treinoCampo').value||null,
+    balneario:document.getElementById('treinoBalneario').value||null,
+    balneario_nome:document.getElementById('treinoBalneario').value||null,
+    tipo:document.getElementById('treinoTipo').value,
+    sub_equipa:document.getElementById('treinoSubEquipa').value||null,
+    observacoes:document.getElementById('treinoObs').value||null,
+    updated_at:new Date().toISOString()
   };
-  document.getElementById('saveTreinoBtn').textContent='A guardar…';
-  const { error } = id
-    ? await sb.from('treinos').update(payload).eq('id',id)
-    : await sb.from('treinos').insert(payload);
-  document.getElementById('saveTreinoBtn').textContent='Guardar';
-  if(error) { showToast('Erro: '+error.message, true); return; }
-  document.getElementById('treinoOverlay').hidden=true;
-  showToast(id?'Treino atualizado':'Treino adicionado');
-  await loadAll();
-});
+  if(!data.data||!data.escalao_id){ toast('Preencha equipa e data','error'); return; }
+  let error;
+  if(id){
+    ({error}=await sb.from('treinos').update(data).eq('id',id));
+    if(!error) treinos=treinos.map(t=>t.id===parseInt(id)?{...t,...data,id:parseInt(id)}:t);
+  } else {
+    const r=await sb.from('treinos').insert(data).select().single();
+    error=r.error;
+    if(!error) treinos.push(r.data);
+  }
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('treinoOverlay');
+  toast(id?'Treino actualizado ✓':'Treino adicionado ✓');
+  const activeTab=document.querySelector('.nav-tab.active')?.dataset.tab;
+  if(activeTab==='mapa') renderMapa(); else renderMicro();
+};
 
-document.getElementById('deleteTreinoBtn').addEventListener('click', async()=>{
+window.deleteTreino = async function(){
   const id=document.getElementById('treinoId').value;
   if(!id||!confirm('Eliminar este treino?')) return;
-  await sb.from('treinos').delete().eq('id',id);
-  document.getElementById('treinoOverlay').hidden=true;
-  showToast('Treino eliminado');
-  await loadAll();
-});
+  const {error}=await sb.from('treinos').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  treinos=treinos.filter(t=>t.id!==parseInt(id));
+  closeOverlay('treinoOverlay');
+  toast('Treino eliminado');
+  const activeTab=document.querySelector('.nav-tab.active')?.dataset.tab;
+  if(activeTab==='mapa') renderMapa(); else renderMicro();
+};
 
-// ── EXPORTAR MAPA ──
-document.getElementById('exportMapaBtn').addEventListener('click', () => {
-  window.print();
-});
+// ===== PAIS =====
+function populatePaisFilters(){
+  const sel=document.getElementById('paisEscalao');
+  sel.innerHTML='<option value="">Todas as equipas</option>'+
+    escaloes.filter(e=>e.ativo!==false).map(e=>
+      `<option value="${e.id}">${e.nome}</option>`
+    ).join('');
+  const months=new Set();
+  jogos.forEach(j=>{ if(j.data) months.add(j.data.substring(0,7)); });
+  const selM=document.getElementById('paisMes');
+  selM.innerHTML='<option value="">Todos os meses</option>'+
+    [...months].sort().map(m=>{
+      const [y,mo]=m.split('-');
+      const label=new Date(y,mo-1,1).toLocaleDateString('pt-PT',{month:'long',year:'numeric'});
+      return `<option value="${m}">${label.charAt(0).toUpperCase()+label.slice(1)}</option>`;
+    }).join('');
+}
 
-// ── VISTA PAIS ──
-function renderPais() {
-  const escalaoFiltro = +document.getElementById('paisEscalaoFilter').value || null;
-  const periodo = document.getElementById('paisPeriodo').value;
-  const hoje = new Date(); hoje.setHours(0,0,0,0);
+window.renderPais = function(){
+  const escId=document.getElementById('paisEscalao').value;
+  const mes=document.getElementById('paisMes').value;
+  const today=new Date().toISOString().split('T')[0];
+  let filtered=jogos.filter(j=>j.data>=today&&j.tipo_jogo!=='isento');
+  if(escId) filtered=filtered.filter(j=>j.escalao_id===parseInt(escId));
+  if(mes) filtered=filtered.filter(j=>j.data.startsWith(mes));
+  filtered.sort((a,b)=>a.data<b.data?-1:1);
 
-  let dataMin, dataMax;
-  if (periodo === 'semana') {
-    dataMin = hoje;
-    dataMax = addDays(hoje, 7);
-  } else if (periodo === 'mes') {
-    dataMin = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    dataMax = new Date(hoje.getFullYear(), hoje.getMonth()+1, 0);
-  } else {
-    dataMin = hoje;
-    dataMax = new Date('2099-12-31');
-  }
-
-  let filtrados = jogos.filter(j => {
-    const d = parseDateLocal(j.data);
-    return d >= dataMin && d <= dataMax && j.adversario !== 'A Definir';
-  });
-  if (escalaoFiltro) filtrados = filtrados.filter(j => j.escalao_id === escalaoFiltro);
-  filtrados.sort((a,b) => a.data.localeCompare(b.data) || (a.hora||'').localeCompare(b.hora||''));
-
-  const container = document.getElementById('paisCards');
-  if (!filtrados.length) {
-    container.innerHTML = `<div class="pais-empty">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/>
-      </svg>
-      Sem jogos para o período selecionado.
-    </div>`;
+  if(!filtered.length){
+    document.getElementById('paisGrid').innerHTML='<div class="empty-state">Sem jogos agendados.</div>';
     return;
   }
 
-  let html = '';
-  let lastDate = '';
-  filtrados.forEach(j => {
-    const esc = escaloes.find(e => e.id === j.escalao_id);
-    const d = parseDateLocal(j.data);
-    const dateStr = fmt(d, {weekday:'long', day:'numeric', month:'long', year:'numeric'});
-    const hora = j.hora ? j.hora.slice(0,5) : null;
-    const jornada = j.jornada ? `Jornada ${j.jornada}` : '';
+  document.getElementById('paisGrid').innerHTML=`<div class="jogos-grid">${
+    filtered.map(j=>{
+      const esc=escaloes.find(e=>e.id===j.escalao_id);
+      const cor=esc?.cor||'#3b82f6';
+      const corTxt=esc?.cor_texto||'#fff';
+      const cf=j.casa_fora==='C'?'🏠 Casa':'✈️ Fora';
+      const dt=new Date(j.data+'T00:00:00');
+      const dtLabel=dt.toLocaleDateString('pt-PT',{weekday:'long',day:'2-digit',month:'long'});
+      const sub=j.sub_equipa?` (${j.sub_equipa})`:'';
+      let tipo='';
+      if(j.tipo_jogo==='jornada') tipo=j.jornada?`Jornada ${j.jornada}`:'Jornada';
+      else if(j.tipo_jogo==='taca') tipo=j.jornada?`Taça Elim. ${j.jornada}`:'Taça';
+      else if(j.tipo_jogo==='jogo_treino') tipo='Jogo Treino';
+      return `<div class="jogo-card-pais" style="background:${cor};color:${corTxt}">
+        <div class="p-escalao">${esc?.nome||''}${sub}</div>
+        <div class="p-tipo">${tipo} · ${cf}</div>
+        <div class="p-adv">${j.adversario||'A definir'}</div>
+        <div class="p-data">${dtLabel}</div>
+        <div class="p-hora">${fmtHora(j.hora)||'—'}</div>
+        ${(j.campo_nome||j.local)?`<div class="p-local">${j.campo_nome||j.local}</div>`:''}
+      </div>`;
+    }).join('')
+  }</div>`;
+};
 
-    if (j.data !== lastDate) {
-      if (lastDate) html += '</div>';
-      html += `<div style="grid-column:1/-1;margin-top:${lastDate?'8px':'0'}">
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;
-          color:var(--accent2);text-transform:uppercase;letter-spacing:.04em;
-          border-bottom:2px solid var(--accent2);padding-bottom:4px;margin-bottom:10px">
-          ${dateStr}
-        </div>
-      </div>
-      <div style="display:contents">`;
-      lastDate = j.data;
-    }
+// ===== EQUIPAS CRUD =====
+window.renderEquipasCrud = function(){
+  document.getElementById('equipasTbody').innerHTML=escaloes.map(e=>`
+    <tr>
+      <td>${e.nome}</td>
+      <td>${e.abreviatura||''}</td>
+      <td>${e.sub||''}</td>
+      <td>${e.ano_nasc||''}</td>
+      <td><span class="color-swatch" style="background:${e.cor}"></span>${e.cor}</td>
+      <td>${e.ordem}</td>
+      <td>
+        <button class="btn-warning" onclick="openEquipaModal(${e.id})">✏️ Editar</button>
+      </td>
+    </tr>`).join('');
+};
 
-    html += `<div class="jogo-card">
-      <div class="jogo-card-head" style="border-left:4px solid ${esc?.cor||'var(--accent2)'}">
-        <div class="jogo-card-esc" style="color:${esc?.cor||'var(--accent2)'}">${esc?.nome||''}</div>
-        <span class="jogo-card-cf cf-${j.casa_fora}">${j.casa_fora === 'C' ? '🏠 Casa' : '✈️ Fora'}</span>
-      </div>
-      <div class="jogo-card-sep"></div>
-      <div class="jogo-card-body">
-        <div class="jogo-card-adv">
-          ${j.adversario}
-          ${jornada ? `<small>${jornada}</small>` : ''}
-        </div>
-        <div class="jogo-card-meta">
-          ${hora ? `<span>⏰ ${hora}</span>` : ''}
-          ${j.local ? `<span>📍 ${j.local}</span>` : ''}
-          ${j.observacoes ? `<span>ℹ️ ${j.observacoes}</span>` : ''}
-        </div>
-      </div>
-    </div>`;
-  });
-  if (lastDate) html += '</div>';
-  container.innerHTML = html;
+window.openEquipaModal = function(id=null){
+  document.getElementById('equipaId').value=id||'';
+  document.getElementById('equipaDeleteBtn').style.display=id?'flex':'none';
+  document.getElementById('equipaModalTitle').textContent=id?'✏️ Editar Equipa':'➕ Nova Equipa';
+  if(id){
+    const e=escaloes.find(x=>x.id===id);
+    if(!e) return;
+    document.getElementById('equipaNome').value=e.nome;
+    document.getElementById('equipaAbrev').value=e.abreviatura||'';
+    document.getElementById('equipaSub').value=e.sub||'';
+    document.getElementById('equipaAnos').value=e.ano_nasc||'';
+    document.getElementById('equipaCor').value=e.cor||'#2563eb';
+    document.getElementById('equipaOrdem').value=e.ordem||1;
+  } else {
+    document.getElementById('equipaNome').value='';
+    document.getElementById('equipaAbrev').value='';
+    document.getElementById('equipaSub').value='';
+    document.getElementById('equipaAnos').value='';
+    document.getElementById('equipaCor').value='#2563eb';
+    document.getElementById('equipaOrdem').value=escaloes.length+1;
+  }
+  openOverlay('equipaOverlay');
+};
+
+window.saveEquipa = async function(){
+  const id=document.getElementById('equipaId').value;
+  const data={
+    nome:document.getElementById('equipaNome').value,
+    abreviatura:document.getElementById('equipaAbrev').value||null,
+    sub:document.getElementById('equipaSub').value||null,
+    ano_nasc:document.getElementById('equipaAnos').value||null,
+    cor:document.getElementById('equipaCor').value,
+    ordem:parseInt(document.getElementById('equipaOrdem').value)||1
+  };
+  if(!data.nome){ toast('Preencha o nome','error'); return; }
+  let error;
+  if(id){
+    ({error}=await sb.from('escaloes').update(data).eq('id',id));
+    if(!error) escaloes=escaloes.map(e=>e.id===parseInt(id)?{...e,...data}:e);
+  } else {
+    const r=await sb.from('escaloes').insert(data).select().single();
+    error=r.error;
+    if(!error) escaloes.push(r.data);
+  }
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('equipaOverlay');
+  toast(id?'Equipa actualizada ✓':'Equipa criada ✓');
+  renderEquipasCrud();
+  buildLegenda('mapaLegenda'); buildLegenda('microLegenda');
+};
+
+window.deleteEquipa = async function(){
+  const id=document.getElementById('equipaId').value;
+  if(!id||!confirm('Eliminar esta equipa?')) return;
+  const {error}=await sb.from('escaloes').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  escaloes=escaloes.filter(e=>e.id!==parseInt(id));
+  closeOverlay('equipaOverlay');
+  toast('Equipa eliminada');
+  renderEquipasCrud();
+};
+
+// ===== CAMPOS CRUD =====
+window.renderCamposCrud = function(){
+  document.getElementById('camposTbody').innerHTML=campos.map(c=>`
+    <tr><td>${c.nome}</td><td>${c.localizacao||''}</td>
+    <td><button class="btn-warning" onclick="openCampoModal(${c.id})">✏️</button></td></tr>`).join('');
+};
+
+window.openCampoModal = function(id=null){
+  document.getElementById('campoId').value=id||'';
+  document.getElementById('campoDeleteBtn').style.display=id?'flex':'none';
+  document.getElementById('campoModalTitle').textContent=id?'✏️ Editar Campo':'➕ Novo Campo';
+  if(id){
+    const c=campos.find(x=>x.id===id);
+    if(!c) return;
+    document.getElementById('campoNome').value=c.nome;
+    document.getElementById('campoLoc').value=c.localizacao||'';
+  } else {
+    document.getElementById('campoNome').value='';
+    document.getElementById('campoLoc').value='';
+  }
+  openOverlay('campoOverlay');
+};
+
+window.saveCampo = async function(){
+  const id=document.getElementById('campoId').value;
+  const data={nome:document.getElementById('campoNome').value, localizacao:document.getElementById('campoLoc').value||null};
+  if(!data.nome){ toast('Preencha o nome','error'); return; }
+  let error;
+  if(id){
+    ({error}=await sb.from('campos').update(data).eq('id',id));
+    if(!error) campos=campos.map(c=>c.id===parseInt(id)?{...c,...data}:c);
+  } else {
+    const r=await sb.from('campos').insert(data).select().single();
+    error=r.error; if(!error) campos.push(r.data);
+  }
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('campoOverlay');
+  toast('Campo guardado ✓');
+  renderCamposCrud();
+};
+
+window.deleteCampo = async function(){
+  const id=document.getElementById('campoId').value;
+  if(!id||!confirm('Eliminar este campo?')) return;
+  const {error}=await sb.from('campos').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  campos=campos.filter(c=>c.id!==parseInt(id));
+  closeOverlay('campoOverlay');
+  toast('Campo eliminado');
+  renderCamposCrud();
+};
+
+// ===== BALNEÁRIOS CRUD =====
+window.renderBalneCrud = function(){
+  document.getElementById('balneTbody').innerHTML=balnearios.map(b=>`
+    <tr><td>${b.nome}</td>
+    <td><button class="btn-warning" onclick="openBalnearioModal(${b.id})">✏️</button></td></tr>`).join('');
+};
+
+window.openBalnearioModal = function(id=null){
+  document.getElementById('balnearioId').value=id||'';
+  document.getElementById('balnearioDeleteBtn').style.display=id?'flex':'none';
+  document.getElementById('balnearioModalTitle').textContent=id?'✏️ Editar Balneário':'➕ Novo Balneário';
+  if(id){
+    const b=balnearios.find(x=>x.id===id);
+    if(!b) return;
+    document.getElementById('balnearioNome').value=b.nome;
+  } else {
+    document.getElementById('balnearioNome').value='';
+  }
+  openOverlay('balnearioOverlay');
+};
+
+window.saveBalneario = async function(){
+  const id=document.getElementById('balnearioId').value;
+  const data={nome:document.getElementById('balnearioNome').value};
+  if(!data.nome){ toast('Preencha o nome','error'); return; }
+  let error;
+  if(id){
+    ({error}=await sb.from('balnearios').update(data).eq('id',id));
+    if(!error) balnearios=balnearios.map(b=>b.id===parseInt(id)?{...b,...data}:b);
+  } else {
+    const r=await sb.from('balnearios').insert(data).select().single();
+    error=r.error; if(!error) balnearios.push(r.data);
+  }
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('balnearioOverlay');
+  toast('Balneário guardado ✓');
+  renderBalneCrud();
+};
+
+window.deleteBalneario = async function(){
+  const id=document.getElementById('balnearioId').value;
+  if(!id||!confirm('Eliminar este balneário?')) return;
+  const {error}=await sb.from('balnearios').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  balnearios=balnearios.filter(b=>b.id!==parseInt(id));
+  closeOverlay('balnearioOverlay');
+  toast('Balneário eliminado');
+  renderBalneCrud();
+};
+
+// ===== ÉPOCAS CRUD =====
+window.renderEpocasCrud = function(){
+  document.getElementById('epocasTbody').innerHTML=epocas.map(e=>`
+    <tr><td>${e.nome}</td><td>${e.ativa?'✅ Ativa':'—'}</td>
+    <td><button class="btn-warning" onclick="openEpocaModal(${e.id})">✏️</button></td></tr>`).join('');
+};
+
+window.openEpocaModal = function(id=null){
+  document.getElementById('epocaId').value=id||'';
+  document.getElementById('epocaDeleteBtn').style.display=id?'flex':'none';
+  document.getElementById('epocaModalTitle').textContent=id?'✏️ Editar Época':'➕ Nova Época';
+  if(id){
+    const e=epocas.find(x=>x.id===id);
+    if(!e) return;
+    document.getElementById('epocaNome').value=e.nome;
+    document.getElementById('epocaAtiva').checked=e.ativa;
+  } else {
+    document.getElementById('epocaNome').value='';
+    document.getElementById('epocaAtiva').checked=false;
+  }
+  openOverlay('epocaOverlay');
+};
+
+window.saveEpoca = async function(){
+  const id=document.getElementById('epocaId').value;
+  const data={nome:document.getElementById('epocaNome').value, ativa:document.getElementById('epocaAtiva').checked};
+  if(!data.nome){ toast('Preencha o nome','error'); return; }
+  let error;
+  if(id){
+    ({error}=await sb.from('epocas').update(data).eq('id',id));
+    if(!error) epocas=epocas.map(e=>e.id===parseInt(id)?{...e,...data}:e);
+  } else {
+    const r=await sb.from('epocas').insert(data).select().single();
+    error=r.error; if(!error) epocas.push(r.data);
+  }
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  closeOverlay('epocaOverlay');
+  toast('Época guardada ✓');
+  renderEpocasCrud();
+};
+
+window.deleteEpoca = async function(){
+  const id=document.getElementById('epocaId').value;
+  if(!id||!confirm('Eliminar esta época?')) return;
+  const {error}=await sb.from('epocas').delete().eq('id',id);
+  if(error){ toast('Erro: '+error.message,'error'); return; }
+  epocas=epocas.filter(e=>e.id!==parseInt(id));
+  closeOverlay('epocaOverlay');
+  toast('Época eliminada');
+  renderEpocasCrud();
+};
+
+// ===== PWA SERVICE WORKER =====
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
-// Popula filtro de escalões na vista pais
-function populatePaisFilter() {
-  const sel = document.getElementById('paisEscalaoFilter');
-  sel.innerHTML = '<option value="">Todos os escalões</option>' +
-    escaloes.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
-}
-
-document.getElementById('paisEscalaoFilter').addEventListener('change', renderPais);
-document.getElementById('paisPeriodo').addEventListener('change', renderPais);
-
-// ── VIEWS (override para incluir pais) ──
-document.querySelectorAll('.nav-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-    tab.classList.add('active');
-    const v = document.getElementById('view-'+tab.dataset.view);
-    if (v) { v.classList.add('active'); if (tab.dataset.view==='pais') renderPais(); }
-  });
-});
-
-// ── INIT ──
-(async()=>{
-  await initAuth();
-  await loadAll();
-  populatePaisFilter();
-})();
+// ===== INIT =====
+loadAll();
 </script>
 </body>
 </html>

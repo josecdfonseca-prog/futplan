@@ -1,15 +1,25 @@
 {
-  "name": "FutPlan – Arões SC",
+  "name": "FutPlan – Arões Sport Clube",
   "short_name": "FutPlan",
   "description": "Gestão de jogos e treinos do Arões Sport Clube",
   "start_url": "https://josecdfonseca-prog.github.io/futplan/",
   "scope": "https://josecdfonseca-prog.github.io/futplan/",
   "display": "standalone",
-  "orientation": "portrait-primary",
-  "background_color": "#1a3f7a",
-  "theme_color": "#1a3f7a",
+  "orientation": "portrait",
+  "background_color": "#1a3a6b",
+  "theme_color": "#1a3a6b",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+    {
+      "src": "https://josecdfonseca-prog.github.io/futplan/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://josecdfonseca-prog.github.io/futplan/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
   ]
 }
